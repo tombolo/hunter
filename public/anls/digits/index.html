@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tick Display</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg-color: #f5f5f5;
+      --card-bg: white;
+      --text-color: #333;
+      --dropdown-bg: white;
+      --dropdown-border: #ccc;
+      --glow-box-bg: #2e2e2e;
+      --glow-box-text: #fff;
+      --history-text: #ff8c00;
+      --digit-container-bg: #f2f3f4;
+      --digit-circle-bg: #2c2c2c;
+      --digit-circle-text: white;
+      --digit-percent: orange;
+      --outer-border: darkgray;
+      --switch-bg: #ccc;
+      --switch-knob: white;
+    }
+
+    .dark-mode {
+      --bg-color: #121212;
+      --card-bg: #1e1e1e;
+      --text-color: #e0e0e0;
+      --dropdown-bg: #2d2d2d;
+      --dropdown-border: #444;
+      --glow-box-bg: #333;
+      --glow-box-text: #fff;
+      --history-text: #ffaa44;
+      --digit-container-bg: #1a1a1a;
+      --digit-circle-bg: #333;
+      --digit-circle-text: white;
+      --digit-percent: #ffaa44;
+      --outer-border: #555;
+      --switch-bg: #444;
+      --switch-knob: #aaa;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      padding: 30px;
+      font-family: 'Segoe UI', sans-serif;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .dropdown-container {
+      margin-bottom: 20px;
+    }
+
+    .dropdown-label {
+      font-weight: bold;
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    .dropdown {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid var(--dropdown-border);
+      background-color: var(--dropdown-bg);
+      color: var(--text-color);
+    }
+
+    .tick-card {
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(200, 200, 200, 0.5);
+      max-width: 500px;
+      margin: auto;
+      transition: background-color 0.3s;
+    }
+
+    .glow-box {
+      background: var(--glow-box-bg);
+      color: var(--glow-box-text);
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      text-align: center;
+      font-size: 1.2rem;
+      box-shadow: 0 0 10px rgba(128, 128, 128, 0.8),
+                  0 0 30px rgba(128, 128, 128, 0.6);
+      transition: background-color 0.3s;
+    }
+
+    #digit-history {
+      text-align: center;
+      font-size: 1.1rem;
+      color: var(--history-text);
+      margin-top: 10px;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    /* Theme switch styles */
+    .theme-switch-container {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      margin-bottom: 20px;
+    }
+
+    .theme-switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+    }
+
+    .theme-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--switch-bg);
+      transition: .4s;
+      border-radius: 34px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: var(--switch-knob);
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #2196F3;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+
+    .theme-label {
+      margin-right: 10px;
+      font-weight: bold;
+    }
+
+    @media (max-width: 576px) {
+      .glow-box {
+        font-size: 1rem;
+      }
+
+      .tick-card {
+        padding: 15px;
+      }
+    }
+
+    .digit-container {
+      background-color: var(--digit-container-bg);
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      transition: background-color 0.3s;
+    }
+
+    .digit-wrapper {
+      position: relative;
+      margin: 10px;
+    }
+
+    .digit-circle {
+      width: 70px;
+      height: 70px;
+      background-color: var(--digit-circle-bg);
+      color: var(--digit-circle-text);
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      position: relative;
+      z-index: 2;
+      transition: background-color 0.3s;
+    }
+
+    .digit-percent {
+      font-size: 0.75rem;
+      color: var(--digit-percent);
+      position: absolute;
+      bottom: 8px;
+      transition: color 0.3s;
+    }
+
+    .digit-arrow {
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-top: 12px;
+      width: 0;
+      height: 0;
+      border-left: 7px solid transparent;
+      border-right: 7px solid transparent;
+      border-top: 10px solid red;
+      z-index: 2;
+    }
+
+    .outer-border {
+      content: '';
+      position: absolute;
+      top: -5px;
+      left: -5px;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 6px solid var(--outer-border);
+      z-index: 1;
+      pointer-events: none;
+      transition: border-color 0.3s;
+    }
+
+    .outer-border::after {
+      content: '';
+      position: absolute;
+      top: -6px;
+      left: -6px;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 6px solid transparent;
+      border-bottom-color: red;
+      z-index: 2;
+    }
+
+    /* Per-digit color overrides */
+    .digit-wrapper[data-color="gray"] .outer-border::after {
+      border-bottom-color: gray;
+    }
+
+    .digit-wrapper[data-color="gold"] .outer-border::after {
+      border-bottom-color: gold;
+    }
+
+    .digit-wrapper[data-color="turquoise"] .outer-border::after {
+      border-bottom-color: turquoise;
+    }
+
+    .digit-wrapper[data-color="blue"] .outer-border::after {
+      border-bottom-color: blue;
+    }
+
+    .digit-wrapper[data-color="red"] .outer-border::after {
+      border-bottom-color: red;
+    }
+
+    .digit-wrapper[data-color="orange"] .outer-border::after {
+      border-bottom-color: orange;
+    }
+
+    @media (max-width: 768px) {
+      .digit-circle {
+        width: 60px;
+        height: 60px;
+      }
+
+      .outer-border {
+        width: 70px;
+        height: 70px;
+        top: -5px;
+        left: -5px;
+      }
+
+      .outer-border::after {
+        width: 70px;
+        height: 70px;
+        top: -6px;
+        left: -6px;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .digit-circle {
+        width: 50px;
+        height: 50px;
+      }
+
+      .digit-percent {
+        font-size: 0.65rem;
+      }
+
+      .outer-border {
+        width: 60px;
+        height: 60px;
+        top: -5px;
+        left: -5px;
+      }
+
+      .outer-border::after {
+        width: 60px;
+        height: 60px;
+        top: -6px;
+        left: -6px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="theme-switch-container">
+    <span class="theme-label">Dark Mode</span>
+    <label class="theme-switch">
+      <input type="checkbox" id="theme-toggle">
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <div class="container">
+    <div class="dropdown-container">
+      <label for="market" class="dropdown-label">Select Market</label>
+      <select id="market" class="dropdown">
+        <option value="">Select Market</option>
+        <option value="R_10">Volatility 10 Index</option>
+        <option value="R_25">Volatility 25 Index</option>
+        <option value="R_50">Volatility 50 Index</option>
+        <option value="R_75">Volatility 75 Index</option>
+        <option value="R_100">Volatility 100 Index</option>
+        <option value="R_200">Volatility 200 Index</option>
+        <option value="R_300">Volatility 300 Index</option>
+        <option value="R_10_1s">Volatility 10 (1s) Index</option>
+        <option value="R_25_1s">Volatility 25 (1s) Index</option>
+        <option value="R_50_1s">Volatility 50 (1s) Index</option>
+        <option value="R_75_1s">Volatility 75 (1s) Index</option>
+        <option value="R_100_1s">Volatility 100 (1s) Index</option>
+      </select>
+    </div>
+
+    <div class="dropdown-container">
+      <label for="tick-count" class="dropdown-label">Number of Ticks</label>
+      <select id="tick-count" class="dropdown">
+        <option value="100">100 Ticks</option>
+        <option value="200">200 Ticks</option>
+        <option value="500" selected>500 Ticks</option>
+        <option value="1000">1000 Ticks</option>
+        <option value="2000">2000 Ticks</option>
+      </select>
+    </div>
+
+    <div class="tick-card">
+      <div class="glow-box" id="latest-tick">Latest Tick: --</div>
+      <div class="glow-box" id="last-digit">Last Digit: --</div>
+      <div id="digit-history">History: --</div>
+    </div>
+  </div>
+
+<br>
+  <div class="digit-container">
+    <div class="digit-wrapper" data-digit="0">
+      <div class="outer-border"></div>
+      <div class="digit-circle">
+        0
+        <div class="digit-percent">10.10%</div>
+      </div>
+    </div>
+
+    <div class="digit-wrapper" data-digit="1">
+      <div class="outer-border"></div>
+      <div class="digit-circle">
+        1
+        <div class="digit-percent">9.10%</div>
+      </div>
+    </div>
+
+    <div class="digit-wrapper" data-digit="2">
+      <div class="outer-border"></div>
+      <div class="digit-circle">
+        2
+        <div class="digit-percent">11.30%</div>
+      </div>
+    </div>
+
+    <div class="digit-wrapper" data-digit="3">
+      <div class="outer-border"></div>
+      <div class="digit-circle">
+        3
+        <div class="digit-percent">11.00%</div>
+      </div>
+    </div>
+
+    <div class="digit-wrapper" data-digit="4">
+      <div class="outer-border"></div>
+      <div class="digit-circle">
+        4
+        <div class="digit-percent">9.90%</div>
+      </div>
+    </div>
+
+    <div class="digit-wrapper" data-digit="5">
+      <div class="outer-border"></div>
+      <div class="digit-circle">
+        5
+        <div class="digit-percent">10.30%</div>
+      </div>
+    </div>
+
+    <div class="digit-wrapper" data-digit="6">
+      <div class="outer-border"></div>
+      <div class="digit-circle">
+        6
+        <div class="digit-percent">10.40%</div>
+      </div>
+    </div>
+
+    <div class="digit-wrapper" data-digit="7">
+      <div class="outer-border"></div>
+      <div class="digit-circle">
+        7
+        <div class="digit-percent">8.50%</div>
+      </div>
+    </div>
+
+    <div class="digit-wrapper" data-digit="8">
+      <div class="outer-border"></div>
+      <div class="digit-circle">
+        8
+        <div class="digit-percent">9.70%</div>
+      </div>
+    </div>
+
+    <div class="digit-wrapper" data-digit="9">
+      <div class="outer-border"></div>
+      <div class="digit-circle">
+        9
+        <div class="digit-percent">9.70%</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const appId = '66860';
+      const tickSocketUrl = `wss://ws.binaryws.com/websockets/v3?app_id=${appId}`;
+      let tickSocket = null;
+
+      const marketDropdown = document.getElementById("market");
+      const tickCountDropdown = document.getElementById("tick-count");
+      const latestTickElem = document.getElementById("latest-tick");
+      const lastDigitElem = document.getElementById("last-digit");
+      const digitHistoryContainer = document.getElementById("digit-history");
+      const digitWrappers = document.querySelectorAll('.digit-wrapper');
+      const themeToggle = document.getElementById("theme-toggle");
+      
+      let digitHistory = [];
+      let allTicks = [];
+      let maxHistoryLength = 500; // Default to 500 ticks
+
+      // Initialize digit colors to gray
+      digitWrappers.forEach(wrapper => {
+        wrapper.setAttribute('data-color', 'gray');
+      });
+
+      // Theme toggle functionality
+      themeToggle.addEventListener('change', function() {
+        if (this.checked) {
+          document.body.classList.add('dark-mode');
+        } else {
+          document.body.classList.remove('dark-mode');
+        }
+      });
+
+      // Reimplemented connectToMarket function with additional functionality
+      function connectToMarket(selectedMarket) {
+        if (tickSocket) {
+          tickSocket.close();
+        }
+
+        if (!selectedMarket) return null;
+
+        digitHistory = [];
+        allTicks = [];
+        digitHistoryContainer.innerHTML = "History: --";
+
+        tickSocket = new WebSocket(tickSocketUrl);
+        
+        tickSocket.onopen = () => {
+          tickSocket.send(JSON.stringify({
+            ticks: selectedMarket,
+            subscribe: 1
+          }));
+        };
+
+        tickSocket.onerror = (error) => {
+          console.error("WebSocket error:", error);
+        };
+
+        tickSocket.onclose = () => {
+          console.log("WebSocket connection closed");
+        };
+
+        tickSocket.onmessage = (msg) => {
+          const data = JSON.parse(msg.data);
+          displayTickData(data, latestTickElem, lastDigitElem);
+        };
+        
+        return tickSocket;
+      }
+
+      // Reimplemented displayTickData function with additional functionality
+      function displayTickData(data, latestTickElem, lastDigitElem) {
+        if (data.tick) {
+          const tickQuote = data.tick.quote;
+          const tick = parseFloat(tickQuote).toFixed(data.tick.pip_size);
+          const digit = tick.slice(-1);
+
+          latestTickElem.textContent = `Latest Tick: ${tick}`;
+          lastDigitElem.textContent = `Last Digit: ${digit}`;
+
+          digitHistory.unshift(digit);
+          digitHistory = digitHistory.slice(0, 20);
+          digitHistoryContainer.innerHTML = `History: ${digitHistory.join(", ")}`;
+          
+          allTicks.push(tick);
+          if (allTicks.length > maxHistoryLength * 2) {
+            allTicks = allTicks.slice(-maxHistoryLength);
+          }
+          
+          calculatePercentages();
+          updateArrowPosition(digit);
+          
+          return parseInt(digit);
+        }
+        return null;
+      }
+
+      function calculatePercentages() {
+        const digitCounts = Array(10).fill(0);
+        const recentTicks = allTicks.slice(-maxHistoryLength);
+        
+        if (recentTicks.length === 0) return;
+        
+        recentTicks.forEach(tick => {
+          const digit = parseInt(tick.slice(-1));
+          digitCounts[digit]++;
+        });
+        
+        const percentages = digitCounts.map(count => 
+          ((count / recentTicks.length) * 100).toFixed(2)
+        );
+        
+        // Update percentage displays
+        digitWrappers.forEach(wrapper => {
+          const digit = parseInt(wrapper.getAttribute('data-digit'));
+          const percentElem = wrapper.querySelector('.digit-percent');
+          percentElem.textContent = `${percentages[digit]}%`;
+        });
+        
+        // Find highest and lowest percentages
+        let highestPercent = -1;
+        let highestDigit = -1;
+        let secondHighestPercent = -1;
+        let secondHighestDigit = -1;
+        let lowestPercent = 101;
+        let lowestDigit = -1;
+        let secondLowestPercent = 101;
+        let secondLowestDigit = -1;
+        
+        percentages.forEach((percentStr, digit) => {
+          const percent = parseFloat(percentStr);
+          
+          if (percent > highestPercent) {
+            secondHighestPercent = highestPercent;
+            secondHighestDigit = highestDigit;
+            highestPercent = percent;
+            highestDigit = digit;
+          } else if (percent > secondHighestPercent) {
+            secondHighestPercent = percent;
+            secondHighestDigit = digit;
+          }
+          
+          if (percent < lowestPercent) {
+            secondLowestPercent = lowestPercent;
+            secondLowestDigit = lowestDigit;
+            lowestPercent = percent;
+            lowestDigit = digit;
+          } else if (percent < secondLowestPercent) {
+            secondLowestPercent = percent;
+            secondLowestDigit = digit;
+          }
+        });
+        
+        // Reset all to gray first
+        digitWrappers.forEach(wrapper => {
+          wrapper.setAttribute('data-color', 'gray');
+          wrapper.querySelector('.digit-arrow')?.remove();
+        });
+        
+        // Apply colors based on percentages
+        if (highestDigit !== -1) {
+          const highestWrapper = document.querySelector(`.digit-wrapper[data-digit="${highestDigit}"]`);
+          highestWrapper.setAttribute('data-color', 'turquoise');
+        }
+        
+        if (lowestDigit !== -1) {
+          const lowestWrapper = document.querySelector(`.digit-wrapper[data-digit="${lowestDigit}"]`);
+          lowestWrapper.setAttribute('data-color', 'red');
+        }
+        
+        // Apply blue to second highest if >= 11%
+        if (secondHighestDigit !== -1 && secondHighestPercent >= 11) {
+          const secondHighestWrapper = document.querySelector(`.digit-wrapper[data-digit="${secondHighestDigit}"]`);
+          secondHighestWrapper.setAttribute('data-color', 'blue');
+        }
+        
+        // Apply orange to second lowest if <= 9%
+        if (secondLowestDigit !== -1 && secondLowestPercent <= 9) {
+          const secondLowestWrapper = document.querySelector(`.digit-wrapper[data-digit="${secondLowestDigit}"]`);
+          secondLowestWrapper.setAttribute('data-color', 'orange');
+        }
+      }
+
+      function updateArrowPosition(digit) {
+        // Remove all existing arrows first
+        document.querySelectorAll('.digit-arrow').forEach(arrow => arrow.remove());
+        
+        if (digit !== undefined && digit !== null) {
+          const digitWrapper = document.querySelector(`.digit-wrapper[data-digit="${digit}"]`);
+          if (digitWrapper) {
+            const arrow = document.createElement('div');
+            arrow.className = 'digit-arrow';
+            digitWrapper.appendChild(arrow);
+          }
+        }
+      }
+
+      tickCountDropdown.addEventListener('change', () => {
+        maxHistoryLength = parseInt(tickCountDropdown.value);
+        calculatePercentages();
+      });
+
+      marketDropdown.addEventListener("change", () => {
+        const selectedMarket = marketDropdown.value;
+        connectToMarket(selectedMarket);
+      });
+    });
+</script>
+</body>
+</html>

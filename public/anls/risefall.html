@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rise and Fall</title>
+    <link rel="stylesheet" href="stylesrisefall.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">Rise and Fall</h1>
+        <select id="market-select" class="dropdown">
+                <option value="R_10">Volatility 10 index</option>
+                <option value="1HZ10V">Volatility 10(1s) index</option>
+                <option value="R_25">Volatility 25 index</option>
+                <option value="1HZ25V">Volatility 25(1s) index</option>
+                <option value="R_50">Volatility 50 index</option>
+                <option value="1HZ50V">Volatility 50(1s) index</option>
+                <option value="R_75">Volatility 75 index</option>1
+                <option value="1HZ75V">Volatility 75(1s) index</option>
+                <option value="R_100">Volatility 100 index</option>
+                <option value="1HZ100V">Volatility 100(1s) index</option>
+        </select>
+        <select id="tick-select" class="dropdown">
+            <option value="5">5 Ticks</option>
+            <option value="10">10 Ticks</option>
+            <option value="50">50 Ticks</option>
+             <option value="50">100 Ticks</option>
+              <option value="50">200 Ticks</option>
+               <option value="50">500 Ticks</option>
+                <option value="50">1000 Ticks</option>
+        </select>
+        <div id="tick-display" class="tick-display">Latest Tick: --</div>
+        <div class="chart-container">
+            <div class="bar" id="rise-bar" style="width: 50%;">Rise</div>
+            <div class="bar" id="fall-bar" style="width: 50%;">Fall</div>
+        </div>
+        <div id="bar-container">
+    <div id="rise-bar" style="width: 50px; height: 0%; background-color: grey;"></div>
+    <div id="fall-bar" style="width: 50px; height: 0%; background-color: grey;"></div>
+</div>
+
+        <table class="prediction-table">
+            <thead>
+                <tr>
+                    <th colspan="2">Rise/Fall Predictions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Rise %:</td>
+                    <td id="rise-percentage">0%</td>
+                </tr>
+                <tr>
+                    <td>Fall %:</td>
+                    <td id="fall-percentage">0%</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Candlestick Formation Container -->
+        <div class="candlestick-container">
+            <h2 class="candlestick-title">Candlestick Formation</h2>
+            <select id="interval-select" class="dropdown">
+                <option value="60">1 Minute</option>
+                <option value="120">2 Minutes</option>
+                <option value="180">3 Minutes</option>
+                <option value="300">5 Minutes</option>
+                <option value="600">10 Minutes</option>
+                <option value="780">13 Minutes</option>
+                <option value="900">15 Minutes</option>
+                <option value="3600">1 Hour</option>
+                <option value="7200">2 Hours</option>
+                <option value="86400">24 Hours</option>
+            </select>
+            <table class="candlestick-table">
+                <thead>
+                    <tr>
+                        <th>Entry Point</th>
+                        <th>Closing Point</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="candlestick-body">
+                    <tr>
+                        <td>--</td>
+                        <td>--</td>
+                        <td>No candlestick forming</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script src="scriptrisefall.js"></script>
+</body>
+</html>

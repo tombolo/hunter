@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signal Hacker</title><br>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: monospace; }
+        body {
+            background: url('3-2.jpg') no-repeat center center/cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            padding: 100px 0;
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.85);
+            padding: 40px;
+            width: 85%;
+            max-width: 1200px;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgb(30, 0, 255);
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+        .terminal {
+            width: 100%;
+            height: 200px;
+            background: black;
+            color: rgb(0, 17, 255);
+            padding: 15px;
+            overflow-y: auto;
+            border-radius: 10px;
+            box-shadow: 0 0 25px rgb(0, 4, 255);
+            font-size: 14px;
+            text-align: left;
+            display: none;
+        }
+        .error {
+            color: red;
+        }
+        select {
+            width: 100%;
+            padding: 15px;
+            margin: 15px 0;
+            border: 2px solid rgb(51, 0, 255);
+            background: black;
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgb(17, 0, 255);
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .buttons {
+            margin: 20px 0;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            background: rgb(0, 4, 255);
+            color: black;
+            box-shadow: 0 0 10px rgb(0, 8, 255);
+        }
+        .explosion {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            display: none;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .results {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px magenta;
+            text-align: left;
+            transition: 0.3s;
+        }
+        .results:hover {
+            box-shadow: 0 0 15px magenta, 0 0 20px cyan;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="container">
+        <h1>Deriv Signal Scanner</h1><br><br>
+        <div class="terminal" id="terminal"></div>
+        <div id="options">
+            <label> Select Market: </label><br>
+            <select id="market" class="dropdown" onchange="updateMarket()">
+                <option value="">Select Market</option>
+                <option value="R_10">Volatility 10 Index</option>
+                <option value="R_25">Volatility 25 Index</option>
+                <option value="R_50">Volatility 50 Index</option>
+                <option value="R_75">Volatility 75 Index</option>
+                <option value="R_100">Volatility 100 Index</option>
+                <option value="1HZ10V">Volatility 10(1s) Index</option>
+                <option value="1HZ25V">Volatility 25(1s) Index</option>
+                <option value="1HZ50V">Volatility 50(1s) Index</option>
+                <option value="1HZ75V">Volatility 75(1s) Index</option>
+                <option value="1HZ100V">Volatility 100(1s) Index</option>
+            </select><br>
+            <label> Select Strategy: </label>
+            <select id="strategy" class="dropdown">
+                <option value="">Select strategy</option>
+                  <option>Matches/Differs</option>
+                  <option>Even/Odd</option>
+                  <option>Over/Under</option>
+                  <option>Rise/Fall</option>
+              </select><br>
+        </div>
+        <br>
+        <div class="latest-tick">Latest Tick: <span id="latestTick">--</span></div><br>
+         <div class="latest-tick">Last Digit: <span id="lastDigit">--</span></div> 
+ 
+
+        <div class="buttons">
+            <button onclick="startTerminal()">Analyse</button>
+            <button onclick="pauseTerminal()">Pause</button>
+            <button onclick="stopTerminal()">Stop</button>
+        </div>
+        <div class="results">
+            <h2>Results</h2>
+            <p>No data yet.</p>
+        </div>
+        <div class="explosion" id="explosion"></div>
+    </div>
+    <audio id="audio" src="https://www.fesliyanstudios.com/play-mp3/4386"></audio>
+    <script>
+        const terminal = document.getElementById('terminal');
+        const explosion = document.getElementById('explosion');
+        const audio = document.getElementById('audio');
+        let interval, strategySelected;
+        let socket, tickHistory = [];
+        let maxTicks = 100;
+        
+        function addMessage(msg, isError = false) {
+            const p = document.createElement("p");
+            p.textContent = msg;
+            if (isError) {
+                p.style.color = "blue";
+                p.style.fontWeight = "bold";
+            }
+            terminal.appendChild(p);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+        
+        function startTerminal() {
+            terminal.style.display = 'block';
+            terminal.innerHTML = '';
+            audio.play();
+            strategySelected = document.getElementById("strategy").value;
+            if (!strategySelected) {
+                addMessage("⚠️ Error: Please select a strategy first!", true);
+                return;
+            }
+            let codes = [];
+            for (let i = 0; i < 100; i++) {
+                codes.push(`Executing process ${i + 1}...`);
+                codes.push(`Fetching encrypted keys...`);
+                codes.push(`Decrypting packet ${Math.floor(Math.random() * 1000)}...`);
+                codes.push(`Sending data to remote server...`);
+                codes.push(`Firewall bypassed at ${new Date().toLocaleTimeString()}...`);
+                if (Math.random() > 0.6) {
+                    codes.push(`<span class='error'>ERROR: Connection Timeout at ${new Date().toLocaleTimeString()}...</span>`);
+                }
+            }
+            let index = 0;
+            interval = setInterval(() => {
+                if (index < codes.length) {
+                    let line = document.createElement('div');
+                    line.innerHTML = codes[index];
+                    terminal.appendChild(line);
+                    terminal.scrollTop = terminal.scrollHeight;
+                    index++;
+                } else {
+                    clearInterval(interval);
+                    triggerExplosion();
+                    setTimeout(() => simulateAnalysisProcess(strategySelected), 2000);
+                }
+            }, 30);
+        }
+        
+        function stopTerminal() {
+            clearInterval(interval);
+            terminal.style.display = 'none';
+            audio.pause();
+            audio.currentTime = 0;
+        }
+        
+        function pauseTerminal() {
+            clearInterval(interval);
+            audio.pause();
+        }
+        
+        function triggerExplosion() {
+            explosion.style.display = 'block';
+            setTimeout(() => {
+                explosion.style.display = 'none';
+            }, 2000);
+        }
+        
+        function simulateAnalysisProcess(strategy) {
+            terminal.innerHTML = "";
+            const messages = {
+                "Matches/Differs": ["🔍 Initializing Matches/Differs analysis...", "📡 Connecting to market servers...", "📊 Fetching real-time tick data...", "✅ Least occurring digit found!", "📝 Preparing final Matches/Differs report..."],
+                "Even/Odd": ["📊 Analyzing Even/Odd patterns...", "📈 Verifying market trends...", "✅ High-confidence entry point detected!", "📝 Finalizing Even/Odd strategy evaluation..."],
+                "Over/Under": ["📉 Assessing Over/Under probability...", "📡 Fetching tick distribution data...", "✅ Best number for Over/Under identified!", "📝 Preparing Over/Under strategy insights..."],
+                "Rise/Fall": ["📊 Analyzing market movement...", "📈 Calculating Rise/Fall trends...", "✅ Identifying best entry point!", "📝 Preparing Rise/Fall strategy report..."]
+            };
+        
+            let delay = 500;
+            messages[strategy].forEach((msg, index) => {
+                setTimeout(() => addMessage(msg), delay * index);
+            });
+        
+            startCountdown(15);
+        }
+        
+        function startCountdown(seconds) {
+            let countdown = seconds;
+            const countdownInterval = setInterval(() => {
+                addMessage(`⏳ Time remaining: ${countdown} seconds...`);
+                countdown--;
+                if (countdown < 0) {
+                    clearInterval(countdownInterval);
+                    addMessage("🔍 Processing results...");
+                    analyzeDigits();
+                }
+            }, 1000);
+        }
+        
+        function analyzeDigits() {
+            const strategy = strategySelected;
+            const resultsDiv = document.querySelector(".results");
+            resultsDiv.innerHTML = "<h2>Results</h2>";
+        
+            if (tickHistory.length === 0) {
+                resultsDiv.innerHTML += "<p>No data collected.</p>";
+                return;
+            }
+        
+            let digitCounts = Array(10).fill(0);
+            let evenCount = 0, oddCount = 0;
+            let underCount = 0, overCount = 0;
+            let riseCount = 0, fallCount = 0;    
+            let lastDigits = [...tickHistory]; // ✅ Populate lastDigits with tickHistory
+            let entryPoint = "✅ Entry point found after 3 opposite occurrences!";
+        
+            for (let i = 1; i < tickHistory.length; i++) {
+                if (tickHistory[i] > tickHistory[i - 1]) riseCount++;
+                else if (tickHistory[i] < tickHistory[i - 1]) fallCount++;
+            }
+        
+            tickHistory.forEach(digit => {
+                digitCounts[digit]++;
+                digit % 2 === 0 ? evenCount++ : oddCount++;
+                digit < 5 ? underCount++ : overCount++;
+            });
+        
+            let mostFreqDigit = digitCounts.indexOf(Math.max(...digitCounts));
+            let leastFreqDigit = digitCounts.indexOf(Math.min(...digitCounts.filter(n => n > 0)));
+            
+            let bestMarket = evenCount > oddCount ? "Even" : "Odd";
+    if (Math.abs(evenCount - oddCount) < 2) {
+        bestMarket = "Balanced (No clear trend)";
+    }
+
+            let bestOverUnder = underCount > overCount ? "Over" : "Under";
+            let mostFrequentUnder = digitCounts.slice(0, 5).indexOf(Math.max(...digitCounts.slice(0, 5)));
+            let mostFrequentOver = digitCounts.slice(5, 10).indexOf(Math.max(...digitCounts.slice(5, 10))) + 5;
+      
+            let riseFallTrend = riseCount > fallCount ? "Rise" : "Fall";
+            
+            let risePercentage = ((riseCount / (riseCount + fallCount)) * 100).toFixed(2);
+            let fallPercentage = ((fallCount / (riseCount + fallCount)) * 100).toFixed(2);
+        
+             // ✅ Fixing the logic for detecting entry points
+             if (strategy === "Even/Odd") {
+                let count = 0;
+                for (let i = 1; i < lastDigits.length; i++) {
+                    if ((bestMarket === "Even" && lastDigits[i - 1] % 2 !== 0) || 
+                        (bestMarket === "Odd" && lastDigits[i - 1] % 2 === 0)) {
+                        count++;
+                    } else {
+                        if (count >= 3) {
+                            entryPoint = `After ${count} times of opposite, first ${bestMarket} appears`;
+                            break;
+                        }
+                        count = 0;
+                    }
+                }
+            }
+
+            if (strategy === "Matches/Differs") {
+                resultsDiv.innerHTML += `<p>Match number detected (Matches): ${mostFreqDigit}</p>`;
+                resultsDiv.innerHTML += `<p>Differ number detected (Differs): ${leastFreqDigit}</p>`;
+            } else if (strategy === "Even/Odd") {
+                resultsDiv.innerHTML += `<p>Best Market: ${bestMarket}</p>`;
+                resultsDiv.innerHTML += `<p>Entry Point: ${entryPoint}</p>`;
+            } else if (strategy === "Over/Under") {
+                resultsDiv.innerHTML += `<p>Best Market: ${bestOverUnder}</p>`;
+                resultsDiv.innerHTML += `<p>Most Frequent Digit in ${bestOverUnder}: ${bestOverUnder === "Over" ? mostFrequentUnder : mostFrequentOver}</p>`;
+            } else if (strategy === "Rise/Fall") {
+                resultsDiv.innerHTML += `<p>Best Market: ${riseFallTrend}</p>`;
+                resultsDiv.innerHTML += `<p>Rise Percentage: ${risePercentage}%</p>`;
+                resultsDiv.innerHTML += `<p>Fall Percentage: ${fallPercentage}%</p>`;
+            }
+        
+            startRunBotCountdown(5);
+        }
+        
+        function startRunBotCountdown(seconds) {
+            let countdown = seconds;
+            const countdownInterval = setInterval(() => {
+                addMessage(`🚀 Run the bot in: ${countdown} seconds...`);
+                countdown--;
+                if (countdown < 0) {
+                    clearInterval(countdownInterval);
+                    addMessage("🔥 Run the bot now!");
+                }
+            }, 1000);
+        }
+        
+        function updateMarket() {
+            const market = document.getElementById("market").value;
+            if (socket) socket.close();
+            tickHistory = [];
+        
+            if (market) {
+                socket = new WebSocket("wss://ws.binaryws.com/websockets/v3?app_id=66860");
+                socket.onopen = () => socket.send(JSON.stringify({ "ticks": market }));
+                socket.onmessage = event => {
+                    const data = JSON.parse(event.data);
+                    if (data.tick) {
+                        const tickQuote = data.tick.quote;
+                        const lastDigit = tickQuote.toString().slice(-1);
+                        document.getElementById("latestTick").innerText = tickQuote;
+                        document.getElementById("lastDigit").innerText = lastDigit;
+        
+                        tickHistory.push(parseInt(lastDigit));
+                        if (tickHistory.length > maxTicks) tickHistory.shift();
+                    }
+                };
+            }
+        }
+        </script>
+        
+</body>
+</html>

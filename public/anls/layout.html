@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Trading Dashboard</title>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+            --dark: #2d3436;
+            --light: #f5f6fa;
+            --success: #00b894;
+            --danger: #d63031;
+            --warning: #fdcb6e;
+            --info: #0984e3;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--dark);
+            color: var(--light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 1rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .logo-icon {
+            width: 30px;
+            height: 30px;
+        }
+        
+        .nav-menu {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .nav-select {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.7rem center;
+            background-size: 1rem;
+            padding-right: 2rem;
+            min-width: 200px;
+        }
+        
+        .nav-select:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+        }
+        
+        .nav-select:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.5);
+        }
+        
+        .content-frame {
+            flex: 1;
+            width: 100%;
+            border: none;
+            background-color: var(--light);
+        }
+        
+        footer {
+            background-color: var(--dark);
+            color: var(--light);
+            text-align: center;
+            padding: 1rem;
+            font-size: 0.8rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .nav-menu {
+                width: 100%;
+            }
+            
+            .nav-select {
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .logo {
+                font-size: 1.2rem;
+            }
+            
+            .nav-select {
+                font-size: 0.8rem;
+                min-width: unset;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L3 12L12 22L21 12L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M3 12H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 2V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Trading Toolkit Pro
+            </div>
+            <div class="nav-menu">
+                <select class="nav-select" onchange="loadPage(this.value)">
+                    <option value="" disabled selected>Select Tool...</option>
+                    <option value="signals.html">Signals</option>
+                    <option value="digitshome.html">Digits</option>
+                    <option value="calculator.html">Calculator</option>
+                    <option value="analyser.html">Market Analyser</option>
+                    <option value="risefall.html">Risefall</option>
+                    <option value="evenodd.html">Even/Odd</option>
+                    <option value="overandunder.html">Over/Under</option>
+                    <option value="percantages.html">Digits Percentages</option>
+                    <option value="riskmanagement.html">Risk Management</option>
+                    <option value="eo.html">Even Odd Strategies</option>
+                    <option value="ou.html">Over Under Strategies</option>
+                    <option value="rfstrategies.html">Rise Fall Strategies</option>
+                    <option value="md.html">Matches and Differs Strategies</option>
+                    <option value="analysistool.html" selected>Analysis Tool</option>
+                </select>
+            </div>
+        </div>
+    </header>
+    
+    <iframe id="contentFrame" class="content-frame" src="analysistool.html"></iframe>
+    
+    <footer>
+        &copy; 2023 Trading Toolkit Pro | All Rights Reserved
+    </footer>
+
+    <script>
+        function loadPage(page) {
+            if (page) {
+                document.getElementById('contentFrame').src = page;
+                
+                // Update the selected option in the dropdown
+                const select = document.querySelector('.nav-select');
+                for (let i = 0; i < select.options.length; i++) {
+                    if (select.options[i].value === page) {
+                        select.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // Prevent Inspect Element
+        document.addEventListener('contextmenu', event => {
+            event.preventDefault();
+            alert('Right-click is disabled on this page!');
+        });
+        
+        document.addEventListener('keydown', event => {
+            if (event.key === 'F12' || (event.ctrlKey && event.shiftKey && event.key === 'I') ||
+                (event.ctrlKey && event.shiftKey && event.key === 'J') ||
+                (event.ctrlKey && event.key === 'U')) {
+                event.preventDefault();
+                alert('Inspecting the page is disabled!');
+            }
+        });
+        
+        // Responsive iframe height adjustment
+        function adjustIframeHeight() {
+            const header = document.querySelector('header');
+            const footer = document.querySelector('footer');
+            const iframe = document.getElementById('contentFrame');
+            
+            const headerHeight = header.offsetHeight;
+            const footerHeight = footer.offsetHeight;
+            
+            iframe.style.height = `calc(100vh - ${headerHeight + footerHeight}px)`;
+        }
+        
+        // Initial adjustment
+        window.addEventListener('load', adjustIframeHeight);
+        
+        // Adjust on resize
+        window.addEventListener('resize', adjustIframeHeight);
+    </script>
+</body>
+</html>

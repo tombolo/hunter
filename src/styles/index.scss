@@ -1,0 +1,79 @@
+@use 'components/shared/styles/themes' as *;
+@import 'https://fonts.googleapis.com/css?family=IBM+Plex+Sans:300,400,500,700&display=swap&subset=cyrillic,cyrillic-ext,latin-ext,vietnamese';
+
+:root {
+    /* Light theme (default) */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f5f5f5;
+    --text-general: #2c3e50;
+    --text-secondary: #6c757d;
+    --border-color: #e9ecef;
+    --card-bg: #ffffff;
+    --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dark-theme {
+    --bg-primary: #1a1a2e;
+    --bg-secondary: #16213e;
+    --text-general: #f8f9fa;
+    --text-secondary: #adb5bd;
+    --border-color: #2d3748;
+    --card-bg: #1e2a47;
+    --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-general);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Apply theme to common elements */
+body, 
+.app-content,
+.header,
+.footer,
+.card,
+.modal-content,
+.dropdown-menu,
+.form-control,
+.table {
+    background-color: var(--bg-primary);
+    color: var(--text-general);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Apply theme to text elements */
+h1, h2, h3, h4, h5, h6,
+p, span, div, a {
+    color: var(--text-general);
+}
+
+/* Apply theme to form elements */
+input, textarea, select {
+    background-color: var(--bg-secondary);
+    color: var(--text-general);
+    border-color: var(--border-color);
+}
+
+/* Apply theme to cards */
+.card {
+    background-color: var(--card-bg);
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--border-color);
+}
+
+.icon-general-fill-path {
+    path {
+        fill: var(--text-general);
+    }
+}
+
+.icon-general-fill-g-path {
+    g {
+        path {
+            fill: var(--text-general);
+        }
+    }
+}

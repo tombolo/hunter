@@ -1,0 +1,347 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #121212;
+    width: 100%;
+    color: #e0e0e0;
+}
+
+.title {
+    font-family: 'Times', sans-serif;
+    color: #FF9E3F; /* Vibrant orange */
+    transition: all 0.5s ease;
+    text-shadow: 0 0 10px rgba(255, 158, 63, 0.7);
+    animation: pulse 2s infinite alternate;
+}
+
+@keyframes pulse {
+    from {
+        text-shadow: 0 0 5px rgba(255, 158, 63, 0.7);
+    }
+    to {
+        text-shadow: 0 0 15px rgba(255, 158, 63, 0.9), 0 0 25px rgba(255, 158, 63, 0.5);
+    }
+}
+
+/* Color Themes for Different Sections */
+.controls {
+    --primary-color: #6A57FF; /* Purple */
+    --secondary-color: #9D8DFF;
+}
+
+.predictions-container {
+    --primary-color: #FF5E7D; /* Pink */
+    --secondary-color: #FF8FA3;
+}
+
+#chartContainer {
+    --primary-color: #2EC4B6; /* Teal */
+    --secondary-color: #59E3D1;
+}
+
+#slidingListContainer {
+    --primary-color: #FFD166; /* Yellow */
+    --secondary-color: #FFDF8E;
+}
+
+/* Apply the color themes */
+.controls {
+    margin-bottom: 20px;
+    align-content: center;
+    color: var(--secondary-color);
+    padding: 20px;
+    border-radius: 20px;
+    text-align: center;
+    width: 100%;
+    background: rgba(30, 30, 40, 0.8);
+    box-shadow: 0 0 15px rgba(106, 87, 255, 0.3);
+    transition: all 0.3s ease;
+    border: 1px solid var(--primary-color);
+}
+
+.controls:hover {
+    box-shadow: 0 0 25px rgba(106, 87, 255, 0.6);
+}
+
+.controls label {
+    display: block;
+    font-size: 1.5em;
+    margin-bottom: 10px;
+    text-shadow: 0 0 5px rgba(106, 87, 255, 0.5);
+    color: var(--secondary-color);
+}
+
+.controls select {
+    width: 90%;
+    padding: 10px;
+    font-size: 1.2em;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-sizing: border-box;
+    background-color: rgba(20, 20, 30, 0.7);
+    color: #ffffff;
+    border: 1px solid var(--primary-color);
+    transition: all 0.3s ease;
+}
+
+.controls select:hover {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 10px rgba(157, 141, 255, 0.5);
+}
+
+button {
+    background: linear-gradient(145deg, var(--primary-color), var(--secondary-color));
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(106, 87, 255, 0.5);
+}
+
+button:hover {
+    background: linear-gradient(145deg, var(--secondary-color), var(--primary-color));
+    transform: translateY(-3px);
+    box-shadow: 0 0 20px rgba(157, 141, 255, 0.8);
+}
+
+#latestTick, #digits {
+    font-size: 24px;
+    margin-top: 10px;
+    padding: 10px;
+    color: #59E3D1; /* Teal */
+    text-shadow: 0 0 8px rgba(46, 196, 182, 0.5);
+}
+
+#chart {
+    background-color: #1A1A2E;
+    border: 1px solid #2EC4B6;
+    box-shadow: 0 0 20px rgba(46, 196, 182, 0.3);
+}
+
+.digit-bar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #FF9E3F, #FF7B00);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+    transition: all 0.3s;
+    box-shadow: 0 0 10px rgba(255, 158, 63, 0.5);
+}
+
+.container {
+    padding: 20px;
+    background: #1A1A2E;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    display: content;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    border: 1px solid #6A57FF;
+}
+
+.digit-bar {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    margin: 5px;
+    background: linear-gradient(145deg, #FF9E3F, #FF7B00);
+    color: white;
+    text-align: center;
+    line-height: 40px;
+    border-radius: 50%;
+    font-size: 20px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.digit-bar:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(255, 158, 63, 0.8);
+}
+
+.digit-bar .arrow {
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 16px;
+    color: #59E3D1;
+    text-shadow: 0 0 5px rgba(46, 196, 182, 0.7);
+}
+
+.digit-bar.highlight {
+    background: linear-gradient(145deg, #6A57FF, #4D3AC1);
+    color: white;
+    box-shadow: 0 0 15px rgba(106, 87, 255, 0.8);
+    animation: glow 1s infinite alternate;
+}
+
+@keyframes glow {
+    from {
+        box-shadow: 0 0 10px rgba(106, 87, 255, 0.8);
+    }
+    to {
+        box-shadow: 0 0 20px rgba(106, 87, 255, 1);
+    }
+}
+
+.predictions-container {
+    text-align: center;
+    margin: 20px auto;
+    width: fit-content;
+    background: rgba(40, 30, 40, 0.8);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(255, 94, 125, 0.3);
+    transition: all 0.3s ease;
+    border: 1px solid var(--primary-color);
+}
+
+.predictions-container:hover {
+    box-shadow: 0 0 30px rgba(255, 94, 125, 0.6);
+}
+
+h2 {
+    color: var(--secondary-color);
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-shadow: 0 0 8px rgba(255, 143, 163, 0.5);
+}
+
+.predictions-table {
+    border-collapse: collapse;
+    margin: 0 auto;
+    width: 100%;
+    border: 1px solid var(--primary-color);
+}
+
+.predictions-table td {
+    border: 2px solid var(--primary-color);
+    padding: 25px;
+    text-align: center;
+    font-size: 15px;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.predictions-table td:hover {
+    background-color: rgba(255, 94, 125, 0.2);
+    transform: scale(1.05);
+}
+
+.number-display {
+    color: #59E3D1;
+    font-weight: bold;
+    font-size: 20px;
+    text-shadow: 0 0 8px rgba(46, 196, 182, 0.5);
+}
+
+#start-predictions {
+    margin-top: 20px;
+    padding: 25px;
+    background: linear-gradient(145deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(255, 94, 125, 0.5);
+}
+
+#start-predictions:hover {
+    background: linear-gradient(145deg, var(--secondary-color), var(--primary-color));
+    transform: translateY(-3px);
+    box-shadow: 0 0 25px rgba(255, 143, 163, 0.8);
+}
+
+#timer {
+    margin-top: 20px;
+    font-size: 28px;
+    color: #FFD166;
+    text-shadow: 0 0 10px rgba(255, 209, 102, 0.7);
+    animation: pulse 1.5s infinite alternate;
+}
+
+#slidingListContainer {
+    width: 100%;
+    overflow: hidden;
+    background-color: rgba(40, 35, 20, 0.7);
+    margin: 20px 0;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(255, 209, 102, 0.3);
+    border: 1px solid var(--primary-color);
+}
+
+#slidingList span {   
+    font-size: 24px;
+    margin-right: 20px;
+    padding: 10px;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+#slidingList span:hover {
+    transform: scale(1.1);
+}
+
+.even-item {
+    color: white;
+    background: linear-gradient(145deg, #2EC4B6, #1EAE9E);
+    box-shadow: 0 0 10px rgba(46, 196, 182, 0.7);
+}
+
+.odd-item {
+    color: white;
+    background: linear-gradient(145deg, #6A57FF, #4D3AC1);
+    box-shadow: 0 0 10px rgba(106, 87, 255, 0.7);
+}
+
+/* Additional Colorful Elements */
+.control-container {
+    background: rgba(25, 25, 45, 0.6);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    border: 1px solid rgba(106, 87, 255, 0.3);
+}
+
+/* Rainbow border animation for container */
+@keyframes rainbow-border {
+    0% { border-color: #FF9E3F; }
+    20% { border-color: #FF5E7D; }
+    40% { border-color: #6A57FF; }
+    60% { border-color: #2EC4B6; }
+    80% { border-color: #FFD166; }
+    100% { border-color: #FF9E3F; }
+}
+
+.container {
+    animation: rainbow-border 8s infinite linear;
+    border-width: 2px;
+}
+
+/* Colorful hover effects for buttons */
+button:nth-child(odd):hover {
+    --primary-color: #FF5E7D;
+    --secondary-color: #FF8FA3;
+}
+
+button:nth-child(even):hover {
+    --primary-color: #2EC4B6;
+    --secondary-color: #59E3D1;
+}

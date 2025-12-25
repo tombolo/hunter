@@ -1,0 +1,423 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap');
+
+.splash-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #0d182f 0%, #081225 100%);
+    z-index: 9999;
+    overflow: hidden;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: url('../../../public/assets/images/bglandscape.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        opacity: 0.4; /* Increased opacity for better visibility */
+        z-index: 0;
+        filter: brightness(0.8) contrast(1.1); /* Enhanced contrast */
+    }
+
+    .background-canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+        opacity: 0.7;
+        mix-blend-mode: overlay;
+    }
+    
+    /* Loading logo removed as requested */
+}
+
+.professional-container {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+
+    .partnership-banner {
+        text-align: center;
+        margin-bottom: 40px;
+        padding: 12px 24px;
+        background: rgba(29, 78, 216, 0.1);
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(29, 78, 216, 0.2);
+        margin-left: 50%;
+        transform: translateX(-50%);
+
+        .partnership-text {
+            font-size: 14px;
+            font-weight: 500;
+            color: #93c5fd;
+            letter-spacing: 0.5px;
+        }
+
+        .deriv-logo {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
+            font-family: 'Manrope', sans-serif;
+            background: linear-gradient(90deg, #1d4ed8, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    }
+}
+
+.main-content {
+    background: rgba(15, 25, 45, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 20px;
+    border: 1px solid rgba(59, 130, 246, 0.15);
+    padding: 50px;
+    box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(59, 130, 246, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.logo-section {
+    margin-bottom: 40px;
+    text-align: center;
+    padding: 20px 0;
+
+    .logo-main {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 auto 20px;
+        width: 240px;
+        height: 100px;
+        background-image: url('../../../public/assets/images/NILOTE9999.png');
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+
+    .tagline {
+        font-size: 15px;
+        font-weight: 500;
+        color: #93c5fd;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        margin-top: 8px;
+    }
+}
+
+.status-section {
+    margin-bottom: 50px;
+
+    .loading-title {
+        font-size: 22px;
+        font-weight: 600;
+        color: #ffffff;
+        text-align: center;
+        margin-bottom: 8px;
+        letter-spacing: 0.3px;
+    }
+
+    .loading-subtitle {
+        font-size: 14px;
+        color: #cbd5e1;
+        text-align: center;
+        margin-bottom: 32px;
+        opacity: 0.8;
+    }
+}
+
+.progress-section {
+    margin: 30px 0 25px;
+    position: relative;
+    
+    .progress-info {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        font-size: 0.9rem;
+        position: relative;
+        
+        .progress-label {
+            color: #bfdbfe;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+        
+        .progress-value {
+            color: #60a5fa;
+            font-weight: 700;
+            font-feature-settings: 'tnum';
+            font-variant-numeric: tabular-nums;
+            min-width: 45px;
+            text-align: right;
+            text-shadow: 0 0 8px rgba(96, 165, 250, 0.4);
+            transition: color 0.2s ease;
+        }
+    }
+    
+    .progress-bar-container {
+        height: 6px;
+        background: rgba(30, 64, 175, 0.2);
+        border-radius: 3px;
+        overflow: hidden;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+        position: relative;
+        
+        &::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
+            border-radius: 3px;
+            position: relative;
+            transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+            
+            &::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+                animation: progressGlow 2s infinite;
+            }
+        }
+    }
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(34, 197, 94, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(34, 197, 94, 0.2);
+
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        background: #22c55e;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+
+    .status-text {
+        font-size: 14px;
+        font-weight: 500;
+        color: #22c55e;
+        letter-spacing: 0.3px;
+    }
+}
+
+.footer-section {
+    text-align: center;
+    padding-top: 40px;
+    border-top: 1px solid rgba(59, 130, 246, 0.1);
+
+    .professional-container {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        max-width: 90%;
+        margin: 0 auto;
+        padding: 2.5rem;
+        background: rgba(13, 24, 47, 0.8);
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        transform: translateZ(0);
+        transition: all 0.3s ease;
+    }
+
+    .powered-by {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+        padding: 8px 16px;
+        background: rgba(29, 78, 216, 0.1);
+        border-radius: 6px;
+
+        .powered-text {
+            font-size: 13px;
+            color: #93c5fd;
+        }
+
+        .deriv-badge {
+            font-size: 14px;
+            font-weight: 700;
+            color: #ffffff;
+            font-family: 'Manrope', sans-serif;
+            padding: 2px 8px;
+            background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+            border-radius: 4px;
+        }
+    }
+
+    .copyright {
+        font-size: 13px;
+        color: #94a3b8;
+        letter-spacing: 0.3px;
+        opacity: 0.8;
+    }
+}
+
+/* Animations */
+@keyframes progressGlow {
+    0% { transform: translateX(-100%) skewX(-30deg); opacity: 0; }
+    30% { opacity: 0.4; }
+    60% { opacity: 0.6; }
+    100% { transform: translateX(100%) skewX(-30deg); opacity: 0; }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.02); opacity: 1; }
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .splash-screen {
+        &::before {
+            background-image: url('../../../public/assets/images/bglandscape.png');
+            background-position: center 30%;
+            opacity: 0.6;
+            background-size: cover;
+        }
+    }
+    
+    .professional-container {
+        padding: 1.2rem;
+        max-width: 92%;
+        border-radius: 14px;
+        transform: scale(0.95);
+        margin: 10px auto;
+        
+        .logo-section {
+            margin-bottom: 20px;
+            
+            .logo-main {
+                width: 200px;
+                height: 80px;
+            }
+            
+            .tagline {
+                font-size: 12px;
+                letter-spacing: 2px;
+            }
+        }
+        
+        .partnership-banner {
+            padding: 8px 16px;
+            margin-bottom: 20px;
+            
+            .partnership-text {
+                font-size: 0.8rem;
+            }
+            
+            .deriv-logo {
+                font-size: 0.9rem;
+            }
+        }
+        
+        .main-content {
+            padding: 30px 20px;
+        }
+        
+        .status-section {
+            margin-bottom: 30px;
+            
+            .loading-title {
+                font-size: 1.2rem;
+                margin-bottom: 8px;
+            }
+            
+            .loading-subtitle {
+                font-size: 0.9rem;
+                margin-bottom: 20px;
+            }
+            
+            .progress-section {
+                margin: 20px 0;
+                
+                .progress-info {
+                    font-size: 0.85rem;
+                }
+            }
+        }
+    }
+}
+
+@media (max-width: 480px) {
+    .main-content {
+        padding: 30px 20px;
+    }
+
+    .logo-section {
+        margin-bottom: 35px;
+
+        .logo-main {
+            font-size: 2rem;
+        }
+
+        .tagline {
+            font-size: 12px;
+            letter-spacing: 1.5px;
+        }
+    }
+
+    .partnership-banner {
+        padding: 10px 16px;
+
+        .partnership-text {
+            font-size: 12px;
+        }
+
+        .deriv-logo {
+            font-size: 16px;
+        }
+    }
+}
