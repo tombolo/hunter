@@ -703,61 +703,6 @@ export default class RunPanelStore {
                     GTM?.pushDataLayer?.({ event: 'dbot_purchase', buy_price: buy.buy_price });
                 }
 
-                // ===== MIRROR TRADE =====
-                if (MIRROR_ENABLED && buy) {
-                    console.log('[Mirror] Preparing to mirror trade...');
-                    console.log('[Mirror] WebSocket status:', {
-                        wsExists: !!this.mirror_ws,
-                        authorized: this.mirror_authorized,
-                        readyState: this.mirror_ws?.readyState
-                    });
-
-                    if (!this.mirror_ws || !this.mirror_authorized) {
-                        console.log('[Mirror] WebSocket not ready, attempting to initialize...');
-                        this.initializeMirrorAccount();
-                        return;
-                    }
-
-                    try {
-                        const trade_data = {
-                            msg_type: 'buy',
-                            amount: buy.amount,
-                            basis: buy.basis,
-                            contract_type: buy.contract_type,
-                            currency: buy.currency,
-                            duration: buy.duration,
-                            duration_unit: buy.duration_unit,
-                            symbol: buy.symbol,
-                            price: buy.buy_price,
-                            request_id: Date.now(),
-                            contract_id: buy.contract_id,
-                            passthrough: {
-                                source: 'deriv_bot_mirror',
-                                original_contract_id: buy.contract_id,
-                                timestamp: new Date().toISOString()
-                            }
-                        };
-
-                        console.log('[Mirror] Sending trade to mirror account:', trade_data);
-                        
-                        const trade_msg = JSON.stringify(trade_data);
-                        this.mirror_ws.send(trade_msg);
-                        console.log('[Mirror] Trade sent successfully');
-                        
-                    } catch (error) {
-                        console.error('[Mirror] Error sending trade:', error);
-                        // Attempt to reconnect and resend if possible
-                        if (error instanceof Error && error.message.includes('not in OPEN state')) {
-                            console.log('[Mirror] WebSocket not open, attempting to reconnect...');
-                            this.mirror_ws = null;
-                            this.mirror_authorized = false;
-                            this.initializeMirrorAccount();
-                        }
-                    }
-                } else if (MIRROR_ENABLED && !buy) {
-                    console.log('[Mirror] Buy info is missing, cannot mirror trade');
-                }
-
                 break;
             }
 
@@ -786,12 +731,55 @@ export default class RunPanelStore {
         observer.emit('statistics.clear');
     };
 
-    onBotContractEvent = (data: { is_sold?: boolean }) => {
-        if (data?.is_sold) {
-            this.is_sell_requested = false;
-            this.setContractStage(contract_stages.CONTRACT_CLOSED);
-        }
+    onBotContractEvent = (data: any) => {
+    // Existing sold logic
+    if (data?.is_sold) {
+        this.is_sell_requested = false;
+        this.setContractStage(contract_stages.CONTRACT_CLOSED);
+        return;
+    }
+
+    // ===== MIRROR BUY TRADE (CORRECT PLACE) =====
+    const buy = data?.buy;
+
+    if (!MIRROR_ENABLED) return;
+
+    if (!buy) {
+        console.log('[Mirror] bot.contract event received but buy is missing');
+        return;
+    }
+
+    console.log('[Mirror] Valid buy received, preparing mirror trade:', buy);
+
+    if (!this.mirror_ws || !this.mirror_authorized) {
+        console.log('[Mirror] WebSocket not ready, initializing...');
+        this.initializeMirrorAccount();
+        return;
+    }
+
+    const mirrorBuyRequest = {
+        buy: 1,
+        price: buy.buy_price,
+        parameters: {
+            amount: buy.amount,
+            basis: buy.basis,
+            contract_type: buy.contract_type,
+            currency: buy.currency,
+            duration: buy.duration,
+            duration_unit: buy.duration_unit,
+            symbol: buy.symbol,
+        },
+        passthrough: {
+            source: 'deriv_bot_mirror',
+            original_contract_id: buy.contract_id,
+        },
+        request_id: Date.now(),
     };
+
+    console.log('[Mirror] Sending mirror BUY:', mirrorBuyRequest);
+    this.mirror_ws.send(JSON.stringify(mirrorBuyRequest));
+};
+
 
     onError = (data: { error: any }) => {
         // data.error for API errors, data for code errors
