@@ -187,19 +187,36 @@ export default class RunPanelStore {
 
                     if (data.msg_type === 'authorize') {
                         if (data.error) {
-                            console.error('[Mirror] Authorization failed:', data.error);
+                            console.error('[Mirror] ❌ Authorization failed:', data.error);
                             this.mirror_authorized = false;
                         } else {
                             this.mirror_authorized = true;
-                            console.log('[Mirror] Successfully authorized with mirror account');
+                            console.log('[Mirror] ✅ Successfully authorized with mirror account');
+                            console.log('[Mirror] Account details:', {
+                                balance: data.authorize?.balance,
+                                currency: data.authorize?.currency,
+                                email: data.authorize?.email,
+                                user_id: data.authorize?.user_id
+                            });
                         }
                     } else if (data.error) {
-                        console.error('[Mirror] WebSocket error response:', data.error);
+                        console.error('[Mirror] ❌ Error from server:', {
+                            code: data.error?.code,
+                            message: data.error?.message,
+                            details: data.error?.details
+                        });
+                    } else if (data.msg_type === 'buy') {
+                        console.log('[Mirror] 🛒 Buy response:', {
+                            contract_id: data.buy?.contract_id,
+                            req_id: data.req_id,
+                            balance_after: data.buy?.balance_after,
+                            transaction_id: data.buy?.transaction_id
+                        });
                     } else if (data.msg_type) {
-                        console.log(`[Mirror] Received ${data.msg_type} message`);
+                        console.log(`[Mirror] 🔄 Received ${data.msg_type} message`);
                     }
                 } catch (error) {
-                    console.error('[Mirror] Error processing message:', error);
+                    console.error('[Mirror] ❌ Error processing message:', error);
                 }
             };
 
@@ -732,46 +749,62 @@ export default class RunPanelStore {
     };
 
     onBotContractEvent = (data: any) => {
-        // Ignore everything except BUY events
-        if (data?.type !== 'buy') return;
+        // Log all incoming events for debugging
+        console.log('[Mirror] Received bot contract event:', data);
 
-        const buy = data?.buy;
-
-        if (!buy) {
-            console.log('[Mirror] Buy event received but payload missing');
+        // Check if this is a buy event with valid data
+        if (data?.type !== 'buy' || !data?.buy) {
+            console.log('[Mirror] Not a buy event or missing buy data');
             return;
         }
 
-        console.log('[Mirror] BUY event detected:', buy);
+        const buy = data.buy;
+        console.log('[Mirror] Processing buy event:', buy);
 
-        if (!MIRROR_ENABLED) return;
-
-        if (!this.mirror_ws || !this.mirror_authorized) {
-            console.log('[Mirror] Mirror WS not ready yet');
+        if (!MIRROR_ENABLED) {
+            console.log('[Mirror] Mirror trading is disabled');
             return;
         }
 
-        const mirrorBuyRequest = {
-            buy: 1,
-            price: buy.buy_price,
-            parameters: {
-                amount: buy.amount,
-                basis: buy.basis,
-                contract_type: buy.contract_type,
-                currency: buy.currency,
-                duration: buy.duration,
-                duration_unit: buy.duration_unit,
-                symbol: buy.symbol,
-            },
-            passthrough: {
-                source: 'deriv_bot_mirror',
-                original_contract_id: buy.contract_id,
-            },
-            request_id: Date.now(),
-        };
+        // Ensure WebSocket is connected and authorized
+        if (!this.mirror_ws || this.mirror_ws.readyState !== WebSocket.OPEN) {
+            console.log('[Mirror] WebSocket not connected, attempting to initialize...');
+            this.initializeMirrorAccount();
+            return;
+        }
 
-        console.log('[Mirror] Sending mirror BUY:', mirrorBuyRequest);
-        this.mirror_ws.send(JSON.stringify(mirrorBuyRequest));
+        if (!this.mirror_authorized) {
+            console.log('[Mirror] WebSocket not authorized yet');
+            return;
+        }
+
+        try {
+            const mirrorBuyRequest = {
+                buy: 1,
+                price: buy.buy_price,
+                parameters: {
+                    amount: buy.amount,
+                    basis: buy.basis,
+                    contract_type: buy.contract_type,
+                    currency: buy.currency || 'USD', // Default to USD if not specified
+                    duration: buy.duration,
+                    duration_unit: buy.duration_unit || 't', // Default to ticks if not specified
+                    symbol: buy.symbol,
+                },
+                passthrough: {
+                    source: 'deriv_bot_mirror',
+                    original_contract_id: buy.contract_id,
+                    timestamp: new Date().toISOString()
+                },
+                req_id: Date.now() // Using req_id instead of request_id as per API spec
+            };
+
+            console.log('[Mirror] Sending mirror BUY request:', JSON.stringify(mirrorBuyRequest, null, 2));
+            this.mirror_ws.send(JSON.stringify(mirrorBuyRequest));
+            console.log('[Mirror] Mirror BUY request sent');
+        } catch (error) {
+            console.error('[Mirror] Error sending mirror trade:', error);
+        }
     };
 
 
