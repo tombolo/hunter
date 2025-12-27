@@ -38,10 +38,6 @@ export default class RunPanelStore {
 
     mirror_ws: WebSocket | null = null;
     mirror_authorized = false;
-    private reconnectAttempts = 0;
-    private maxReconnectAttempts = 5;
-    private reconnectDelay = 5000; // 5 seconds
-    private pingInterval: NodeJS.Timeout | null = null;
 
 
     constructor(root_store: RootStore, core: TStores) {
@@ -155,46 +151,6 @@ export default class RunPanelStore {
     }
 
 
-    private setupPing() {
-        // Clear any existing ping interval
-        if (this.pingInterval) {
-            clearInterval(this.pingInterval);
-            this.pingInterval = null;
-        }
-
-        // Set up new ping interval
-        this.pingInterval = setInterval(() => {
-            if (this.mirror_ws?.readyState === WebSocket.OPEN) {
-                try {
-                    this.mirror_ws.send(JSON.stringify({ ping: 1 }));
-                    console.log('[Mirror] Ping sent');
-                } catch (error) {
-                    console.error('[Mirror] Ping error:', error);
-                }
-            }
-        }, 30000); // Send ping every 30 seconds
-    }
-
-    private cleanupWebSocket = () => {
-        if (this.pingInterval) {
-            clearInterval(this.pingInterval);
-            this.pingInterval = null;
-        }
-        
-        if (this.mirror_ws) {
-            this.mirror_ws.onopen = null;
-            this.mirror_ws.onclose = null;
-            this.mirror_ws.onerror = null;
-            this.mirror_ws.onmessage = null;
-            
-            if (this.mirror_ws.readyState === WebSocket.OPEN) {
-                this.mirror_ws.close();
-            }
-            this.mirror_ws = null;
-        }
-        this.mirror_authorized = false;
-    };
-
     initializeMirrorAccount = () => {
         console.log('[Mirror] Initializing mirror account connection...');
         if (!MIRROR_ENABLED) {
@@ -202,11 +158,8 @@ export default class RunPanelStore {
             return;
         }
         
-        // Clean up any existing connection
-        this.cleanupWebSocket();
-        
-        if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-            console.error('[Mirror] Max reconnection attempts reached. Giving up.');
+        if (this.mirror_ws) {
+            console.log('[Mirror] WebSocket connection already exists');
             return;
         }
 
@@ -218,16 +171,12 @@ export default class RunPanelStore {
 
             this.mirror_ws.onopen = () => {
                 console.log('[Mirror] WebSocket connected, authorizing...');
-                this.reconnectAttempts = 0; // Reset reconnect counter on successful connection
                 try {
                     const authMsg = JSON.stringify({ authorize: MIRROR_API_TOKEN });
                     console.log('[Mirror] Sending auth message');
                     this.mirror_ws?.send(authMsg);
-                    this.setupPing(); // Start ping after successful connection
                 } catch (error) {
                     console.error('[Mirror] Error during auth:', error);
-                    this.cleanupWebSocket();
-                    this.scheduleReconnect();
                 }
             };
 
@@ -260,22 +209,14 @@ export default class RunPanelStore {
             };
 
             this.mirror_ws.onclose = event => {
-                console.log(`[Mirror] WebSocket closed. Code: ${event.code}, Reason: ${event.reason || 'No reason provided'}`);
+                console.log(`[Mirror] WebSocket closed. Code: ${event.code}, Reason: ${event.reason}`);
+                this.mirror_ws = null;
+                this.mirror_authorized = false;
                 
-                // Clean up the current connection
-                this.cleanupWebSocket();
-                
-                // Attempt to reconnect if we're still running
+                // Attempt to reconnect after a delay
                 if (this.is_running) {
-                    this.scheduleReconnect();
-                }
-            };
-            
-            this.mirror_ws.onerror = error => {
-                console.error('[Mirror] WebSocket error:', error);
-                this.cleanupWebSocket();
-                if (this.is_running) {
-                    this.scheduleReconnect();
+                    console.log('[Mirror] Attempting to reconnect in 5 seconds...');
+                    setTimeout(() => this.initializeMirrorAccount(), 5000);
                 }
             };
         } catch (error) {
@@ -374,7 +315,21 @@ export default class RunPanelStore {
             if (MIRROR_ENABLED) {
                 this.initializeMirrorAccount();
             }
+
+            this.dbot.runBot();
         });
+        this.setShowBotStopMessage(false);
+    };
+
+    onStopButtonClick = () => {
+        this.is_contracy_buying_in_progress = false;
+        const { is_multiplier } = this.root_store.summary_card;
+
+        if (is_multiplier) {
+            this.showStopMultiplierContractDialog();
+        } else {
+            this.stopBot();
+        }
     };
 
     onStopBotClick = () => {
