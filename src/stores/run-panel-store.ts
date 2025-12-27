@@ -374,8 +374,7 @@ export default class RunPanelStore {
             if (MIRROR_ENABLED) {
                 this.initializeMirrorAccount();
             }
-
-        }
+        });
     };
 
     onStopBotClick = () => {
