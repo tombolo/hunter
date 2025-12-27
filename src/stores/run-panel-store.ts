@@ -749,63 +749,62 @@ export default class RunPanelStore {
     };
 
     onBotContractEvent = (data: any) => {
-        // Log all incoming events for debugging
         console.log('[Mirror] Received bot contract event:', data);
 
-        // Check if this is a buy event with valid data
-        if (data?.type !== 'buy' || !data?.buy) {
-            console.log('[Mirror] Not a buy event or missing buy data');
+        // ✅ Detect BUY correctly
+        const isBuyEvent =
+            data?.transaction_ids?.buy &&
+            data?.buy_price &&
+            data?.contract_id &&
+            data?.status === 'open';
+
+        if (!isBuyEvent) {
             return;
         }
 
-        const buy = data.buy;
-        console.log('[Mirror] Processing buy event:', buy);
+        console.log('[Mirror] ✅ BUY detected, mirroring trade');
 
-        if (!MIRROR_ENABLED) {
-            console.log('[Mirror] Mirror trading is disabled');
-            return;
-        }
+        if (!MIRROR_ENABLED) return;
 
-        // Ensure WebSocket is connected and authorized
         if (!this.mirror_ws || this.mirror_ws.readyState !== WebSocket.OPEN) {
-            console.log('[Mirror] WebSocket not connected, attempting to initialize...');
-            this.initializeMirrorAccount();
+            console.log('[Mirror] WebSocket not ready');
             return;
         }
 
         if (!this.mirror_authorized) {
-            console.log('[Mirror] WebSocket not authorized yet');
+            console.log('[Mirror] WebSocket not authorized');
             return;
         }
 
-        try {
-            const mirrorBuyRequest = {
-                buy: 1,
-                price: buy.buy_price,
-                parameters: {
-                    amount: buy.amount,
-                    basis: buy.basis,
-                    contract_type: buy.contract_type,
-                    currency: buy.currency || 'USD', // Default to USD if not specified
-                    duration: buy.duration,
-                    duration_unit: buy.duration_unit || 't', // Default to ticks if not specified
-                    symbol: buy.symbol,
-                },
-                passthrough: {
-                    source: 'deriv_bot_mirror',
-                    original_contract_id: buy.contract_id,
-                    timestamp: new Date().toISOString()
-                },
-                req_id: Date.now() // Using req_id instead of request_id as per API spec
-            };
-
-            console.log('[Mirror] Sending mirror BUY request:', JSON.stringify(mirrorBuyRequest, null, 2));
-            this.mirror_ws.send(JSON.stringify(mirrorBuyRequest));
-            console.log('[Mirror] Mirror BUY request sent');
-        } catch (error) {
-            console.error('[Mirror] Error sending mirror trade:', error);
+        // 🛡 Prevent duplicate mirroring
+        if ((this as any)._last_mirrored_contract === data.contract_id) {
+            return;
         }
+        (this as any)._last_mirrored_contract = data.contract_id;
+
+        const mirrorBuyRequest = {
+            buy: 1,
+            price: data.buy_price,
+            parameters: {
+                amount: data.buy_price,
+                basis: 'stake',
+                contract_type: data.contract_type,
+                currency: data.currency,
+                duration: data.tick_count ?? 1,
+                duration_unit: 't',
+                symbol: data.underlying,
+            },
+            passthrough: {
+                source: 'deriv_bot_mirror',
+                original_contract_id: data.contract_id,
+            },
+            req_id: Date.now(),
+        };
+
+        console.log('[Mirror] 🚀 Sending mirror BUY:', mirrorBuyRequest);
+        this.mirror_ws.send(JSON.stringify(mirrorBuyRequest));
     };
+
 
 
     onError = (data: { error: any }) => {
