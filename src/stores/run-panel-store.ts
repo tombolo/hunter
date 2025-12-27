@@ -26,10 +26,17 @@ export type TContractState = {
 // ===== MIRROR TRADING CONFIG =====
 const MIRROR_ENABLED = true;
 const MIRROR_APP_ID = 70344; // use your real app_id
-const MIRROR_API_TOKEN = 'ZQRhJrkSuSu3Yzd';
-
 
 export default class RunPanelStore {
+    // Get API token from localStorage
+    private getMirrorApiToken(): string {
+        const token = localStorage.getItem('deriv_api_token');
+        if (!token) {
+            console.warn('No API token found. Please set your API token in the Copy Trading page.');
+            return '';
+        }
+        return token;
+    }
     root_store: RootStore;
     dbot: TDbot;
     core: TStores;
@@ -172,9 +179,13 @@ export default class RunPanelStore {
             this.mirror_ws.onopen = () => {
                 console.log('[Mirror] WebSocket connected, authorizing...');
                 try {
-                    const authMsg = JSON.stringify({ authorize: MIRROR_API_TOKEN });
+                    const token = this.getMirrorApiToken();
+                    if (!token) return;
+
+                    this.mirror_ws?.send(JSON.stringify({
+                        authorize: token,
+                    }));
                     console.log('[Mirror] Sending auth message');
-                    this.mirror_ws?.send(authMsg);
                 } catch (error) {
                     console.error('[Mirror] Error during auth:', error);
                 }
