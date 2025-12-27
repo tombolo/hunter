@@ -22,12 +22,23 @@ export type TContractState = {
     id: string;
 };
 
+
+// ===== MIRROR TRADING CONFIG =====
+const MIRROR_ENABLED = true;
+const MIRROR_APP_ID = 70344; // use your real app_id
+const MIRROR_API_TOKEN = 'ZQRhJrkSuSu3Yzd';
+
+
 export default class RunPanelStore {
     root_store: RootStore;
     dbot: TDbot;
     core: TStores;
     disposeReactionsFn: () => void;
-    timer: NodeJS.Timeout | null;
+    timer: ReturnType<typeof setInterval> | null;
+
+    mirror_ws: WebSocket | null = null;
+    mirror_authorized = false;
+
 
     constructor(root_store: RootStore, core: TStores) {
         makeObservable(this, {
@@ -139,6 +150,43 @@ export default class RunPanelStore {
         );
     }
 
+
+    initializeMirrorAccount = () => {
+        if (!MIRROR_ENABLED || this.mirror_ws) return;
+
+        this.mirror_ws = new WebSocket(
+            `wss://ws.binaryws.com/websockets/v3?app_id=${MIRROR_APP_ID}`
+        );
+
+        this.mirror_ws.onopen = () => {
+            this.mirror_ws?.send(
+                JSON.stringify({ authorize: MIRROR_API_TOKEN })
+            );
+        };
+
+        this.mirror_ws.onmessage = event => {
+            const data = JSON.parse(event.data);
+
+            if (data.msg_type === 'authorize') {
+                if (data.error) {
+                    console.error('Mirror auth failed:', data.error);
+                } else {
+                    this.mirror_authorized = true;
+                    console.log('Mirror account authorized');
+                }
+            }
+
+            if (data.error) {
+                console.error('Mirror WS error:', data.error);
+            }
+        };
+
+        this.mirror_ws.onerror = err => {
+            console.error('Mirror socket error:', err);
+        };
+    };
+
+
     setShowBotStopMessage = (show_bot_stop_message: boolean) => {
         this.show_bot_stop_message = show_bot_stop_message;
         if (!show_bot_stop_message) return;
@@ -226,6 +274,10 @@ export default class RunPanelStore {
 
             summary_card.clear();
             this.setContractStage(contract_stages.STARTING);
+            if (MIRROR_ENABLED) {
+                this.initializeMirrorAccount();
+            }
+
             this.dbot.runBot();
         });
         this.setShowBotStopMessage(false);
@@ -289,6 +341,12 @@ export default class RunPanelStore {
             window.sendRequestsStatistic(true);
             performance.clearMeasures();
         }
+        if (this.mirror_ws) {
+            this.mirror_ws.close();
+            this.mirror_ws = null;
+            this.mirror_authorized = false;
+        }
+
     };
 
     onClearStatClick = () => {
@@ -599,6 +657,7 @@ export default class RunPanelStore {
             case 'contract.purchase_received': {
                 this.is_contracy_buying_in_progress = false;
                 this.setContractStage(contract_stages.PURCHASE_RECEIVED);
+
                 const { buy } = contract_status;
                 const { is_virtual } = this.core.client;
 
@@ -606,8 +665,24 @@ export default class RunPanelStore {
                     GTM?.pushDataLayer?.({ event: 'dbot_purchase', buy_price: buy.buy_price });
                 }
 
+                // ===== MIRROR TRADE HERE =====
+                if (
+                    MIRROR_ENABLED &&
+                    buy &&
+                    this.mirror_ws &&
+                    this.mirror_authorized
+                ) {
+                    this.mirror_ws.send(
+                        JSON.stringify({
+                            buy: buy.contract_id,
+                            price: buy.buy_price,
+                        })
+                    );
+                }
+
                 break;
             }
+
             case 'contract.sold': {
                 this.is_sell_requested = false;
                 this.setContractStage(contract_stages.CONTRACT_CLOSED);
