@@ -152,38 +152,76 @@ export default class RunPanelStore {
 
 
     initializeMirrorAccount = () => {
-        if (!MIRROR_ENABLED || this.mirror_ws) return;
+        console.log('[Mirror] Initializing mirror account connection...');
+        if (!MIRROR_ENABLED) {
+            console.log('[Mirror] Mirror trading is disabled');
+            return;
+        }
+        
+        if (this.mirror_ws) {
+            console.log('[Mirror] WebSocket connection already exists');
+            return;
+        }
 
-        this.mirror_ws = new WebSocket(
-            `wss://ws.binaryws.com/websockets/v3?app_id=${MIRROR_APP_ID}`
-        );
+        try {
+            const wsUrl = `wss://ws.binaryws.com/websockets/v3?app_id=${MIRROR_APP_ID}`;
+            console.log('[Mirror] Connecting to:', wsUrl);
+            
+            this.mirror_ws = new WebSocket(wsUrl);
 
-        this.mirror_ws.onopen = () => {
-            this.mirror_ws?.send(
-                JSON.stringify({ authorize: MIRROR_API_TOKEN })
-            );
-        };
-
-        this.mirror_ws.onmessage = event => {
-            const data = JSON.parse(event.data);
-
-            if (data.msg_type === 'authorize') {
-                if (data.error) {
-                    console.error('Mirror auth failed:', data.error);
-                } else {
-                    this.mirror_authorized = true;
-                    console.log('Mirror account authorized');
+            this.mirror_ws.onopen = () => {
+                console.log('[Mirror] WebSocket connected, authorizing...');
+                try {
+                    const authMsg = JSON.stringify({ authorize: MIRROR_API_TOKEN });
+                    console.log('[Mirror] Sending auth message');
+                    this.mirror_ws?.send(authMsg);
+                } catch (error) {
+                    console.error('[Mirror] Error during auth:', error);
                 }
-            }
+            };
 
-            if (data.error) {
-                console.error('Mirror WS error:', data.error);
-            }
-        };
+            this.mirror_ws.onmessage = event => {
+                try {
+                    const data = JSON.parse(event.data);
+                    console.log('[Mirror] Received message:', data);
 
-        this.mirror_ws.onerror = err => {
-            console.error('Mirror socket error:', err);
-        };
+                    if (data.msg_type === 'authorize') {
+                        if (data.error) {
+                            console.error('[Mirror] Authorization failed:', data.error);
+                            this.mirror_authorized = false;
+                        } else {
+                            this.mirror_authorized = true;
+                            console.log('[Mirror] Successfully authorized with mirror account');
+                        }
+                    } else if (data.error) {
+                        console.error('[Mirror] WebSocket error response:', data.error);
+                    } else if (data.msg_type) {
+                        console.log(`[Mirror] Received ${data.msg_type} message`);
+                    }
+                } catch (error) {
+                    console.error('[Mirror] Error processing message:', error);
+                }
+            };
+
+            this.mirror_ws.onerror = error => {
+                console.error('[Mirror] WebSocket error:', error);
+                this.mirror_authorized = false;
+            };
+
+            this.mirror_ws.onclose = event => {
+                console.log(`[Mirror] WebSocket closed. Code: ${event.code}, Reason: ${event.reason}`);
+                this.mirror_ws = null;
+                this.mirror_authorized = false;
+                
+                // Attempt to reconnect after a delay
+                if (this.is_running) {
+                    console.log('[Mirror] Attempting to reconnect in 5 seconds...');
+                    setTimeout(() => this.initializeMirrorAccount(), 5000);
+                }
+            };
+        } catch (error) {
+            console.error('[Mirror] Error initializing WebSocket:', error);
+        }
     };
 
 
@@ -665,19 +703,59 @@ export default class RunPanelStore {
                     GTM?.pushDataLayer?.({ event: 'dbot_purchase', buy_price: buy.buy_price });
                 }
 
-                // ===== MIRROR TRADE HERE =====
-                if (
-                    MIRROR_ENABLED &&
-                    buy &&
-                    this.mirror_ws &&
-                    this.mirror_authorized
-                ) {
-                    this.mirror_ws.send(
-                        JSON.stringify({
-                            buy: buy.contract_id,
+                // ===== MIRROR TRADE =====
+                if (MIRROR_ENABLED && buy) {
+                    console.log('[Mirror] Preparing to mirror trade...');
+                    console.log('[Mirror] WebSocket status:', {
+                        wsExists: !!this.mirror_ws,
+                        authorized: this.mirror_authorized,
+                        readyState: this.mirror_ws?.readyState
+                    });
+
+                    if (!this.mirror_ws || !this.mirror_authorized) {
+                        console.log('[Mirror] WebSocket not ready, attempting to initialize...');
+                        this.initializeMirrorAccount();
+                        return;
+                    }
+
+                    try {
+                        const trade_data = {
+                            msg_type: 'buy',
+                            amount: buy.amount,
+                            basis: buy.basis,
+                            contract_type: buy.contract_type,
+                            currency: buy.currency,
+                            duration: buy.duration,
+                            duration_unit: buy.duration_unit,
+                            symbol: buy.symbol,
                             price: buy.buy_price,
-                        })
-                    );
+                            request_id: Date.now(),
+                            contract_id: buy.contract_id,
+                            passthrough: {
+                                source: 'deriv_bot_mirror',
+                                original_contract_id: buy.contract_id,
+                                timestamp: new Date().toISOString()
+                            }
+                        };
+
+                        console.log('[Mirror] Sending trade to mirror account:', trade_data);
+                        
+                        const trade_msg = JSON.stringify(trade_data);
+                        this.mirror_ws.send(trade_msg);
+                        console.log('[Mirror] Trade sent successfully');
+                        
+                    } catch (error) {
+                        console.error('[Mirror] Error sending trade:', error);
+                        // Attempt to reconnect and resend if possible
+                        if (error instanceof Error && error.message.includes('not in OPEN state')) {
+                            console.log('[Mirror] WebSocket not open, attempting to reconnect...');
+                            this.mirror_ws = null;
+                            this.mirror_authorized = false;
+                            this.initializeMirrorAccount();
+                        }
+                    }
+                } else if (MIRROR_ENABLED && !buy) {
+                    console.log('[Mirror] Buy info is missing, cannot mirror trade');
                 }
 
                 break;
