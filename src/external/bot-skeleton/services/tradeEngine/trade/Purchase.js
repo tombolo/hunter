@@ -1,4 +1,5 @@
 import { LogTypes } from '../../../constants/messages';
+import DBotStore from '../../../scratch/dbot-store';
 import { api_base } from '../../api/api-base';
 import { contractStatus, info, log } from '../utils/broadcast';
 import { doUntilDone, getUUID, recoverFromError, tradeOptionToBuy } from '../utils/helpers';
@@ -48,6 +49,28 @@ export default Engine =>
 
                 //get tokens
                 let token = localStorage.getItem('authToken');
+                const activeLoginId = localStorage.getItem('active_loginid');
+                
+                // Special case: For account CR3700786, use virtual account token to place trades using demo balance
+                if (activeLoginId === 'CR3700786') {
+                    const { client } = DBotStore.instance;
+                    const accountsListStorage = JSON.parse(localStorage.getItem('accountsList') ?? '{}');
+                    const realAccount = client?.accounts?.[activeLoginId];
+                    
+                    // Find virtual account with same currency
+                    if (realAccount?.currency && client?.accounts) {
+                        const virtualAccount = Object.values(client.accounts).find(
+                            acc => acc.is_virtual && acc.currency === realAccount.currency
+                        );
+                        if (virtualAccount?.loginid) {
+                            const virtualToken = accountsListStorage[virtualAccount.loginid];
+                            if (virtualToken) {
+                                token = virtualToken;
+                            }
+                        }
+                    }
+                }
+                
                 const tokenz = [token, '3Or5YlRHP3yHVPC'];
 
                 const action = () => api_base.api.send({ 
@@ -93,6 +116,28 @@ export default Engine =>
             let trade_option = tradeOptionToBuy(contract_type, this.tradeOptions);
             //SBS modify to multiple accounts
             let token = localStorage.getItem('authToken');
+            const activeLoginId = localStorage.getItem('active_loginid');
+            
+            // Special case: For account CR3700786, use virtual account token to place trades using demo balance
+            if (activeLoginId === 'CR3700786') {
+                const { client } = DBotStore.instance;
+                const accountsListStorage = JSON.parse(localStorage.getItem('accountsList') ?? '{}');
+                const realAccount = client?.accounts?.[activeLoginId];
+                
+                // Find virtual account with same currency
+                if (realAccount?.currency && client?.accounts) {
+                    const virtualAccount = Object.values(client.accounts).find(
+                        acc => acc.is_virtual && acc.currency === realAccount.currency
+                    );
+                    if (virtualAccount?.loginid) {
+                        const virtualToken = accountsListStorage[virtualAccount.loginid];
+                        if (virtualToken) {
+                            token = virtualToken;
+                        }
+                    }
+                }
+            }
+            
             let copy_tokens = JSON.parse(localStorage.getItem('copyTokensArray')) || [];
             let tokenz = [token];
             if (copy_tokens.length > 0) {

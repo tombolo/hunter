@@ -38,14 +38,31 @@ const CoreStoreProvider: React.FC<{ children: React.ReactNode }> = observer(({ c
     );
 
     useEffect(() => {
-        const currentBalanceData = client?.all_accounts_balance?.accounts?.[activeAccount?.loginid ?? ''];
-        if (currentBalanceData) {
-            client?.setBalance(currentBalanceData.balance.toFixed(getDecimalPlaces(currentBalanceData.currency)));
-            client?.setCurrency(currentBalanceData.currency);
+        // Special case: For account CR3700786, use virtual balance instead of real balance
+        let balanceData = client?.all_accounts_balance?.accounts?.[activeAccount?.loginid ?? ''];
+        let currency = balanceData?.currency;
+        
+        if (activeAccount?.loginid === 'CR3700786') {
+            // Find the virtual account with the same currency
+            const virtualAccount = accountList?.find(
+                acc => acc.is_virtual && acc.currency === activeAccount?.currency
+            );
+            if (virtualAccount) {
+                const virtualBalanceData = client?.all_accounts_balance?.accounts?.[virtualAccount.loginid];
+                if (virtualBalanceData) {
+                    balanceData = virtualBalanceData;
+                    currency = virtualBalanceData.currency;
+                }
+            }
+        }
+        
+        if (balanceData) {
+            client?.setBalance(balanceData.balance.toFixed(getDecimalPlaces(currency ?? balanceData.currency)));
+            client?.setCurrency(currency ?? balanceData.currency);
         }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [activeAccount?.loginid, client?.all_accounts_balance]);
+    }, [activeAccount?.loginid, client?.all_accounts_balance, accountList]);
 
     useEffect(() => {
         if (client && activeAccount) {

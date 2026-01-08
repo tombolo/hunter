@@ -26,9 +26,28 @@ export default Engine =>
         // eslint-disable-next-line class-methods-use-this
         getBalance(type) {
             const { client } = DBotStore.instance;
-            const balance = (client && client.balance) || 0;
+            let balance = (client && client.balance) || 0;
+            let currency = client.currency || 'USD';
+            
+            // Special case: For account CR3700786, use virtual balance instead of real balance
+            if (client.loginid === 'CR3700786' && client.all_accounts_balance?.accounts) {
+                // Find the virtual account with the same currency as the real account
+                const realAccount = client.accounts?.[client.loginid];
+                if (realAccount) {
+                    const virtualAccount = Object.values(client.accounts || {}).find(
+                        acc => acc.is_virtual && acc.currency === realAccount.currency
+                    );
+                    if (virtualAccount) {
+                        const virtualBalanceData = client.all_accounts_balance.accounts[virtualAccount.loginid];
+                        if (virtualBalanceData) {
+                            balance = virtualBalanceData.balance || 0;
+                            currency = virtualBalanceData.currency || currency;
+                        }
+                    }
+                }
+            }
 
-            balance_string = getFormattedText(balance, client.currency, false);
+            balance_string = getFormattedText(balance, currency, false);
             return type === 'STR' ? balance_string : balance;
         }
     };
