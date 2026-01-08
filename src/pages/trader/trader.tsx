@@ -189,7 +189,8 @@ const DTraderAutoLogin: React.FC<DTraderAutoLoginProps> = ({
                 height: '79vh',
                 display: 'flex',
                 flexDirection: 'column',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                marginTop: '4rem'
             }}
         >
             <style jsx>{`

@@ -22,6 +22,13 @@
     width: 100%;
     height: calc(100vh - 9rem);
     padding: 1.6rem;
+    box-sizing: border-box;
+    position: relative;
+
+    // Adjust main wrapper when drawer is open
+    &:has(.main__container--drawer-open) {
+        padding-right: 0;
+    }
 
     @include mobile-or-tablet-screen {
         height: calc(100vh - 6rem);
@@ -33,6 +40,38 @@
         border: none;
         max-width: 100%;
         width: 100%;
+        transition: width 0.3s ease, max-width 0.3s ease;
+        box-sizing: border-box;
+        overflow-x: hidden;
+
+        &--drawer-open {
+            // Adjust width when drawer is open (366px drawer = 36.6rem)
+            // The drawer is fixed positioned at right: 0, so we reduce content width to prevent it from extending under the drawer
+            width: calc(100% - 36.6rem) !important;
+            max-width: calc(100% - 36.6rem) !important;
+            margin-right: 0;
+
+            // Ensure all child elements respect the new width
+            .dc-tabs {
+                width: 100%;
+                max-width: 100%;
+
+                &__list {
+                    width: 100%;
+                    max-width: 100%;
+                }
+
+                &__content {
+                    width: 100%;
+                    max-width: 100%;
+                }
+            }
+
+            @include mobile-or-tablet-screen {
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+        }
 
         &--active {
             // css for onboard tour overlay
@@ -50,6 +89,22 @@
         }
 
         .dc-tabs {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+
+            // Ensure content has spacing when header is fixed
+            &.main__tabs {
+                .dc-tabs__content {
+                    padding-top: 3rem !important; // 24px = ~14px header + 10px spacing
+
+                    @include mobile-or-tablet-screen {
+                        padding-top: 0 !important;
+                    }
+                }
+            }
+
             &__item {
                 position: relative;
                 &::after {
@@ -89,6 +144,14 @@
                 height: 8px;
                 line-height: 9px;
                 position: relative;
+                // Ensure all tabs have equal width using flexbox with max-width constraint
+                flex: 1 1 0 !important;
+                min-width: 0;
+                max-width: 120px; // Limit maximum width of each tab
+                width: auto !important; // Override the var(--tab-width) to use flex instead
+                display: flex;
+                align-items: center;
+                justify-content: center;
                 
                 &:hover:not(.dc-tabs__item--active) {
                     background: #031b6d;
@@ -163,10 +226,14 @@
                 min-height: 12px;
                 position: relative;
                 z-index: 1;
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+                overflow-x: auto;
+                overflow-y: hidden;
+                display: flex;
 
                 @include mobile-or-tablet-screen {
-                    overflow-x: auto;
-                    overflow-y: hidden;
                     -ms-overflow-style: none;
                     scrollbar-width: none;
                     padding: 2px;
@@ -179,10 +246,31 @@
                 &--header {
                     &--main {
                         &__tabs {
+                            // Make the tabs header fixed
+                            position: fixed;
+                            top: calc(4.9rem + 1.6rem); // Header height (4.9rem) + main padding top (1.6rem)
+                            left: 1.6rem;
+                            right: 1.6rem;
+                            z-index: 10;
+                            background: transparent;
+                            transition: right 0.3s ease;
+                            padding: 0;
+                            margin-bottom: 1rem; // 10px spacing below the fixed header
+
+                            // Adjust when drawer is open
+                            .main__container--drawer-open & {
+                                right: calc(1.6rem + 36.6rem);
+                            }
+
                             @include mobile-or-tablet-screen {
+                                position: relative;
+                                top: auto;
+                                left: auto;
+                                right: auto;
                                 width: 100%;
                                 overflow-x: auto;
                                 padding: 0.8rem 1.6rem 0;
+                                margin-bottom: 0;
                             }
                         }
                     }
@@ -196,8 +284,17 @@
             }
 
             &__content {
+                width: 100%;
+                max-width: 100%;
+                overflow-x: hidden;
+                overflow-y: auto;
+                box-sizing: border-box;
+                // Add padding-top to account for fixed tabs header height + 10px spacing
+                // Header is ~14px (12px min-height + 2px margin) + 10px spacing = 24px
+                padding-top: 1.5rem !important; // 24px total spacing
+
                 @include mobile-or-tablet-screen {
-                    width: 100%;
+                    padding-top: 0 !important;
                     overflow-x: auto;
 
                     &--no-result {

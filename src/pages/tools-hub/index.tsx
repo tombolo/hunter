@@ -2,7 +2,7 @@ import React from 'react';
 
 const AiPage: React.FC = () => {
     return (
-        <div style={{ width: '100%', height: '100vh' }}>
+        <div style={{ width: '100%', height: '100vh', marginTop: '4rem' }}>
             <iframe
                 src="https://nuntool.vercel.app/"
                 title="NunTool"

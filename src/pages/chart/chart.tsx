@@ -110,6 +110,7 @@ const Chart = observer(({ show_digits_stats }: { show_digits_stats: boolean }) =
                 'dashboard__chart-wrapper--expanded': is_drawer_open && isDesktop,
                 'dashboard__chart-wrapper--modal': is_chart_modal_visible && isDesktop,
             })}
+            style={{ marginTop: '4rem' }}
             dir='ltr'
         >
             <div style={{ position: 'relative', width: '100%', height: '100%' }}>

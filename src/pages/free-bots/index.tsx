@@ -152,25 +152,53 @@ const FreeBots = observer(() => {
         },
     ];
 
-    const handleBotSelect = (filename: string, botIndex: number) => {
+    const handleBotSelect = async (filename: string, botIndex: number) => {
         setLoadError(null);
         setLoadingBotId(botIndex);
         dashboard.setActiveTab(1);
 
-        const xmlContent = botXmlMap[filename];
+        let xmlContent = botXmlMap[filename];
+
+        // Debug logging
+        console.log(`Loading bot: ${filename}`, {
+            found: !!xmlContent,
+            type: typeof xmlContent,
+            length: xmlContent?.length,
+            preview: xmlContent?.substring?.(0, 100),
+            hasDefault: !!(xmlContent as any)?.default
+        });
 
         if (!xmlContent) {
-            console.error(`XML content not found for ${filename}`);
+            console.error(`XML content not found for ${filename}. Available keys:`, Object.keys(botXmlMap));
             setLoadError(`Could not load bot: XML file "${filename}" not found`);
             setLoadingBotId(null);
             return;
         }
 
-        const loadBot = () => {
+        // Handle both static imports (string) and dynamic imports (object with default)
+        // Some bundlers may wrap the content in a default export
+        if (typeof xmlContent === 'object' && xmlContent !== null && 'default' in xmlContent) {
+            xmlContent = (xmlContent as any).default;
+        }
+
+        // Ensure xmlContent is a string
+        const xmlString = typeof xmlContent === 'string' ? xmlContent : String(xmlContent);
+        
+        if (!xmlString || xmlString.trim().length === 0) {
+            console.error(`XML content is empty for ${filename}`);
+            setLoadError(`Could not load bot: XML file "${filename}" is empty`);
+            setLoadingBotId(null);
+            return;
+        }
+
+        // Wait for tab switch and workspace to be ready
+        await new Promise(resolve => setTimeout(resolve, 300));
+
+        const loadBot = async () => {
             let attempts = 0;
             const maxAttempts = 50;
 
-            const tryLoadBot = () => {
+            const tryLoadBot = async () => {
                 if (!window.Blockly?.derivWorkspace) {
                     attempts++;
                     if (attempts > maxAttempts) {
@@ -183,14 +211,20 @@ const FreeBots = observer(() => {
                 }
 
                 try {
-                    if (!xmlContent.includes('<xml') || !xmlContent.includes('</xml>')) {
+                    if (!xmlString.includes('<xml') && !xmlString.includes('<?xml')) {
+                        console.error('Invalid XML format. Content preview:', xmlString.substring(0, 200));
                         throw new Error('Invalid XML format');
                     }
 
-                    window.Blockly.derivWorkspace.asyncClear();
-                    const xml = window.Blockly.utils.xml.textToDom(xmlContent);
-                    window.Blockly.Xml.domToWorkspace(xml, window.Blockly.derivWorkspace);
-                    window.Blockly.derivWorkspace.strategy_to_load = xmlContent;
+                    // Await asyncClear to ensure workspace is cleared before loading
+                    await window.Blockly.derivWorkspace.asyncClear();
+                    
+                    const xml = window.Blockly.utils.xml.textToDom(xmlString);
+                    
+                    // Use clearWorkspaceAndLoadFromXml to properly replace the workspace content
+                    window.Blockly.Xml.clearWorkspaceAndLoadFromXml(xml, window.Blockly.derivWorkspace);
+                    
+                    window.Blockly.derivWorkspace.strategy_to_load = xmlString;
                     window.Blockly.derivWorkspace.cleanUp();
                     console.log(`Successfully loaded bot: ${filename}`);
                     setLoadingBotId(null);

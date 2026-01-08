@@ -20,7 +20,8 @@ const AiPage: React.FC = () => {
             width: '100%',
             height: '87vh',
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
+            marginTop: '4rem',
         }}>
             <iframe
                 ref={iframeRef}

@@ -1,241 +1,493 @@
-"use client";
-import React, { useEffect, useState } from "react";
+'use client'
+import React, { useState, useEffect } from 'react';
+import { FaYoutube } from 'react-icons/fa';
 
-const CopyTrading = () => {
-    const [apiToken, setApiToken] = useState<string>("");
-    const [isTokenVisible, setIsTokenVisible] = useState<boolean>(false);
-    const [isSaved, setIsSaved] = useState<boolean>(false);
+const TokenManager: React.FC = () => {
+    const [token, setToken] = useState('');
+    const [savedToken, setSavedToken] = useState<string | null>(null);
+    const [toast, setToast] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
+    const [isMobile, setIsMobile] = useState(false);
+    const [isCopyTrading, setIsCopyTrading] = useState(false); // New state for copy trading
+
+    // Check if mobile on mount and resize
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+        
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+    // Auto-dismiss toast after 3 seconds
+    useEffect(() => {
+        if (toast) {
+            const timer = setTimeout(() => {
+                setToast(null);
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [toast]);
 
     // Load saved token on component mount
     useEffect(() => {
-        const savedToken = localStorage.getItem('deriv_api_token');
-        if (savedToken) {
-            setApiToken(savedToken);
+        try {
+            const saved = localStorage.getItem('deriv_copier_token') || localStorage.getItem('deriv_copy_user_token');
+            if (saved) {
+                setSavedToken(saved);
+            }
+        } catch (error) {
+            console.error('Error loading saved token:', error);
         }
     }, []);
 
-    const handleSaveToken = () => {
-        if (!apiToken.trim()) {
-            alert('Please enter a valid API token');
+    const saveToken = () => {
+        const t = token.trim();
+        
+        if (!t) {
+            setToast({ type: 'err', text: 'Token is empty' });
             return;
         }
         
-        // Save to localStorage
-        localStorage.setItem('deriv_api_token', apiToken);
-        setIsSaved(true);
+        if (t.length < 10) {
+            setToast({ type: 'err', text: 'Token is too short' });
+            return;
+        }
         
-        // Reset saved status after 2 seconds
-        setTimeout(() => setIsSaved(false), 2000);
+        try {
+            localStorage.setItem('deriv_copier_token', t);
+            setSavedToken(t);
+            setToken('');
+            setToast({ type: 'ok', text: 'Token saved successfully' });
+        } catch (error) {
+            console.error('Error saving token:', error);
+            setToast({ type: 'err', text: 'Failed to save token' });
+        }
     };
 
-    const toggleTokenVisibility = () => {
-        setIsTokenVisible(!isTokenVisible);
+    const removeToken = () => {
+        try {
+            localStorage.removeItem('deriv_copier_token');
+            localStorage.removeItem('deriv_copy_user_token');
+            setSavedToken(null);
+            setIsCopyTrading(false); // Also stop copy trading if token is removed
+            setToast({ type: 'ok', text: 'Token removed successfully' });
+        } catch (error) {
+            console.error('Error removing token:', error);
+            setToast({ type: 'err', text: 'Failed to remove token' });
+        }
+    };
+
+    const toggleCopyTrading = () => {
+        if (!isCopyTrading) {
+            // Start copy trading
+            setIsCopyTrading(true);
+            setToast({ type: 'ok', text: 'Copy trading started (frontend only)' });
+            console.log('Copy trading started - Frontend simulation only');
+        } else {
+            // Stop copy trading
+            setIsCopyTrading(false);
+            setToast({ type: 'ok', text: 'Copy trading stopped' });
+            console.log('Copy trading stopped - Frontend simulation only');
+        }
     };
 
     return (
-        <div style={{
-            padding: "16px",
-            width: "100%",
-            minHeight: "100vh",
-            fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-            background: "#0f172a",
-            color: "#f8fafc"
+        <div style={{ 
+            width: '100%',
+            minHeight: isMobile ? '75vh' : '100vh',
+            height: isMobile ? '75vh' : '100%',
+            display: 'flex',
+            flexDirection: 'column' as const,
+            padding: isMobile ? '10px' : '20px',
+            boxSizing: 'border-box' as const,
+            overflowX: 'hidden' as const,
+            overflowY: 'auto' as const,
+            backgroundColor: '#dddbdbff'
         }}>
-            <div style={{ 
-                maxWidth: '500px',
-                margin: '0 auto',
-                paddingTop: '40px'
+            {/* Title */}
+            <h2 style={{
+                fontWeight: '700',
+                fontSize: isMobile ? '20px' : '24px',
+                margin: isMobile ? '15px 0 10px' : '20px 0 15px',
+                color: '#0a1aadff',
+                textAlign: isMobile ? 'center' : 'left' as const
             }}>
-                <div style={{ textAlign: "center", marginBottom: "32px" }}>
-                    <h1 style={{ 
-                        fontSize: "24px", 
-                        fontWeight: 700, 
-                        margin: 0, 
-                        marginBottom: "4px",
-                        background: "linear-gradient(90deg, #bfbec4ff, #cbcacfff)",
-                        WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent",
-                        display: "inline-block"
-                    }}>
-                        Copy Trading
-                    </h1>
-                    <p style={{ 
-                        color: "#94a3b8", 
-                        fontSize: "14px",
-                        margin: "4px 0 0",
-                    }}>
-                        Configure your Deriv API token
-                    </p>
-                </div>
+                Token Manager
+            </h2>
 
+            {/* Token Input Section */}
+            <div style={{
+                backgroundColor: 'white',
+                borderRadius: '12px',
+                padding: isMobile ? '16px' : '20px',
+                marginTop: '5px',
+                boxSizing: 'border-box' as const,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+            }}>
                 <div style={{
-                    background: "rgba(30, 41, 59, 0.5)",
-                    padding: "24px",
-                    borderRadius: "12px",
-                    border: "1px solid rgba(255, 255, 255, 0.05)",
-                    boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)"
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: isMobile ? '16px' : '20px',
+                    width: '100%'
                 }}>
-                    <div style={{ 
-                        fontSize: "16px", 
-                        fontWeight: 600,
-                        color: "#e2e8f0",
-                        marginBottom: "16px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px"
-                    }}>
-                        <svg style={{ width: "20px", height: "20px" }} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
-                        </svg>
-                        API Token Configuration
-                    </div>
-                    
-                    <div style={{ marginBottom: "20px" }}>
-                        <label style={{
-                            display: "block",
-                            fontSize: "14px",
-                            color: "#94a3b8",
-                            marginBottom: "8px"
-                        }}>
-                            Deriv API Token
-                        </label>
-                        <div style={{ position: "relative" }}>
-                            <input
-                                type={isTokenVisible ? "text" : "password"}
-                                value={apiToken}
-                                onChange={(e) => setApiToken(e.target.value)}
-                                placeholder="Enter your Deriv API token..."
-                                style={{
-                                    width: "100%",
-                                    padding: "12px 16px",
-                                    paddingRight: "44px",
-                                    background: "rgba(15, 23, 42, 0.5)",
-                                    border: "1px solid rgba(255, 255, 255, 0.1)",
-                                    borderRadius: "6px",
-                                    color: "#f8fafc",
-                                    fontSize: "14px",
-                                    outline: "none",
-                                    transition: "all 0.2s",
-                                    boxSizing: "border-box"
-                                }}
-                            />
-                            <button
-                                onClick={toggleTokenVisibility}
-                                style={{
-                                    position: "absolute",
-                                    right: "8px",
-                                    top: "50%",
-                                    transform: "translateY(-50%)",
-                                    background: "none",
-                                    border: "none",
-                                    color: "#94a3b8",
-                                    cursor: "pointer",
-                                    padding: "4px",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    borderRadius: "4px",
-                                    transition: "all 0.2s"
-                                }}
-                                onMouseOver={(e) => (e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)")}
-                                onMouseOut={(e) => (e.currentTarget.style.background = "transparent")}
-                                title={isTokenVisible ? "Hide token" : "Show token"}
-                            >
-                                {isTokenVisible ? (
-                                    <svg style={{ width: "18px", height: "18px" }} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
-                                    </svg>
-                                ) : (
-                                    <svg style={{ width: "18px", height: "18px" }} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                    </svg>
-                                )}
-                            </button>
-                        </div>
-                        <p style={{
-                            fontSize: "12px",
-                            color: "#64748b",
-                            marginTop: "8px",
-                            lineHeight: 1.4
-                        }}>
-                            Your API token is stored locally in your browser and used to authenticate with Deriv's API.
-                        </p>
-                    </div>
-
                     <div style={{
-                        display: "flex",
-                        justifyContent: "flex-end",
-                        gap: "12px",
-                        marginTop: "20px"
+                        display: 'flex',
+                        flexDirection: isMobile ? 'column' : 'row' as const,
+                        alignItems: 'center',
+                        gap: isMobile ? '15px' : '12px',
+                        width: '100%'
                     }}>
-                        <button
-                            onClick={handleSaveToken}
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'column' as const,
+                            alignItems: 'center',
+                            backgroundColor: '#f5f5f5',
+                            padding: isMobile ? '10px 14px' : '12px 16px',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            border: '1px solid #e0e0e0',
+                            alignSelf: isMobile ? 'center' : 'stretch'
+                        }}>
+                            <FaYoutube style={{ color: '#FF0000', fontSize: isMobile ? '22px' : '24px' }} />
+                            <span style={{
+                                color: '#333',
+                                fontSize: isMobile ? '10px' : '11px',
+                                marginTop: '3px',
+                                fontWeight: '500'
+                            }}>
+                                Tutorial
+                            </span>
+                        </div>
+                        <input
+                            type="password"
+                            placeholder="Enter API token"
+                            value={token}
+                            onChange={e => setToken(e.target.value)}
                             style={{
-                                background: "linear-gradient(90deg, #4f46e5, #7c3aed)",
-                                color: "white",
-                                border: "none",
-                                padding: "10px 24px",
-                                borderRadius: "6px",
-                                fontWeight: 600,
-                                fontSize: "14px",
-                                cursor: "pointer",
-                                transition: "all 0.2s",
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "8px",
-                                opacity: isSaved ? 0.7 : 1,
-                                transform: isSaved ? "scale(0.98)" : "none"
+                                flex: 1,
+                                padding: isMobile ? '14px 16px' : '12px 16px',
+                                border: '2px solid #e0e0e0',
+                                borderRadius: '8px',
+                                fontSize: isMobile ? '16px' : '14px',
+                                outline: 'none',
+                                width: '100%',
+                                boxSizing: 'border-box' as const,
+                                backgroundColor: '#fafafa',
+                                transition: 'border-color 0.2s'
                             }}
-                            disabled={isSaved}
+                            onFocus={(e) => e.target.style.borderColor = '#4CAF50'}
+                            onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
+                        />
+                        <button 
+                            style={{
+                                backgroundColor: '#4CAF50',
+                                color: 'white',
+                                border: 'none',
+                                padding: isMobile ? '14px 16px' : '12px 20px',
+                                borderRadius: '8px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '6px',
+                                whiteSpace: 'nowrap' as const,
+                                transition: 'all 0.2s',
+                                opacity: !token ? 0.6 : 1,
+                                cursor: !token ? 'not-allowed' : 'pointer',
+                                fontSize: isMobile ? '15px' : '14px',
+                                flex: isMobile ? 1 : 'none',
+                                fontWeight: '600',
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                            }}
+                            onClick={saveToken}
+                            disabled={!token}
+                            onMouseEnter={e => {
+                                if (token) {
+                                    e.currentTarget.style.backgroundColor = '#43a047';
+                                    e.currentTarget.style.transform = 'translateY(-1px)';
+                                    e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+                                }
+                            }}
+                            onMouseLeave={e => {
+                                if (token) {
+                                    e.currentTarget.style.backgroundColor = '#4CAF50';
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                                }
+                            }}
                         >
-                            {isSaved ? (
-                                <>
-                                    <svg style={{ width: "16px", height: "16px" }} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
-                                    Saved!
-                                </>
-                            ) : (
-                                <>
-                                    <svg style={{ width: "16px", height: "16px" }} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
-                                    </svg>
-                                    Save Token
-                                </>
-                            )}
+                            <span>Save Token</span>
                         </button>
                     </div>
                 </div>
+            </div>
 
-                <div style={{
-                    marginTop: "40px",
-                    paddingTop: "24px",
-                    borderTop: "1px solid rgba(255, 255, 255, 0.05)",
-                    textAlign: "center"
+            {/* Saved Token Display */}
+            <div style={{
+                backgroundColor: 'white',
+                borderRadius: '12px',
+                padding: isMobile ? '16px' : '20px',
+                marginTop: isMobile ? '15px' : '20px',
+                boxSizing: 'border-box' as const,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                flex: '0 0 auto'
+            }}>
+                <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'space-between',
+                    flexDirection: isMobile ? 'column' : 'row' as const,
+                    gap: isMobile ? '15px' : '0',
+                    width: '100%'
                 }}>
-                    <p style={{
-                        fontSize: "13px",
-                        color: "#64748b",
-                        margin: 0
+                    {/* Token Display */}
+                    <div style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: isMobile ? '12px' : '20px',
+                        flexDirection: isMobile ? 'column' : 'row' as const,
+                        width: isMobile ? '100%' : 'auto'
                     }}>
-                        Need help finding your API token? Visit your <a 
-                            href="https://app.deriv.com/account/api-token" 
-                            target="_blank" 
-                            rel="noopener noreferrer"
+                        <div style={{
+                            backgroundColor: '#f0f4ff',
+                            padding: isMobile ? '12px 16px' : '10px 16px',
+                            borderRadius: '8px',
+                            fontFamily: 'monospace',
+                            fontSize: isMobile ? '14px' : '14px',
+                            color: '#1a237e',
+                            border: '2px solid #d1d9ff',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px',
+                            flexWrap: 'wrap' as const,
+                            justifyContent: 'center',
+                            width: isMobile ? '100%' : 'auto',
+                            boxSizing: 'border-box' as const
+                        }}>
+                            <span style={{ fontWeight: '600' }}>Saved Token:</span>
+                            <span style={{ fontWeight: '500' }}>
+                                {savedToken ? `${savedToken.slice(0, 4)}...${savedToken.slice(-4)}` : 'No token saved'}
+                            </span>
+                            <span style={{
+                                color: savedToken ? '#4caf50' : '#f44336',
+                                fontSize: isMobile ? '12px' : '12px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px'
+                            }}>
+                                <span style={{
+                                    width: '10px',
+                                    height: '10px',
+                                    backgroundColor: savedToken ? '#4caf50' : '#f44336',
+                                    borderRadius: '50%',
+                                    display: 'inline-block'
+                                }}></span>
+                                {savedToken ? 'Saved' : 'Not Saved'}
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Remove Button */}
+                    {savedToken && (
+                        <button 
                             style={{
-                                color: "#818cf8",
-                                textDecoration: "none",
-                                fontWeight: 500
+                                backgroundColor: '#f44336',
+                                color: 'white',
+                                border: 'none',
+                                padding: isMobile ? '14px 16px' : '12px 20px',
+                                borderRadius: '8px',
+                                fontWeight: '600',
+                                fontSize: isMobile ? '15px' : '15px',
+                                whiteSpace: 'nowrap' as const,
+                                transition: 'all 0.2s',
+                                cursor: 'pointer',
+                                flex: isMobile ? 1 : 'none',
+                                textAlign: 'center' as const,
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                width: isMobile ? '100%' : 'auto'
+                            }}
+                            onClick={removeToken}
+                            onMouseEnter={e => {
+                                e.currentTarget.style.backgroundColor = '#d32f2f';
+                                e.currentTarget.style.transform = 'translateY(-1px)';
+                                e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+                            }}
+                            onMouseLeave={e => {
+                                e.currentTarget.style.backgroundColor = '#f44336';
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
                             }}
                         >
-                            Deriv API Token
-                        </a> page.
+                            Remove Token
+                        </button>
+                    )}
+                </div>
+
+                {/* Copy Trading Button */}
+                {savedToken && (
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        marginTop: isMobile ? '20px' : '25px'
+                    }}>
+                        <button 
+                            style={{
+                                backgroundColor: isCopyTrading ? '#f44336' : '#4CAF50',
+                                color: 'white',
+                                border: 'none',
+                                padding: isMobile ? '16px 24px' : '14px 32px',
+                                borderRadius: '8px',
+                                fontWeight: '700',
+                                fontSize: isMobile ? '16px' : '18px',
+                                whiteSpace: 'nowrap' as const,
+                                transition: 'all 0.3s',
+                                cursor: 'pointer',
+                                textAlign: 'center' as const,
+                                boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+                                width: isMobile ? '100%' : 'auto',
+                                minWidth: isMobile ? 'auto' : '250px'
+                            }}
+                            onClick={toggleCopyTrading}
+                            onMouseEnter={e => {
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                e.currentTarget.style.boxShadow = '0 6px 12px rgba(0,0,0,0.25)';
+                            }}
+                            onMouseLeave={e => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+                            }}
+                        >
+                            {isCopyTrading ? '🛑 Stop Copy Trading' : '🚀 Start Copy Trading'}
+                        </button>
+                    </div>
+                )}
+
+                {/* Copy Trading Status */}
+                {savedToken && (
+                    <div style={{
+                        marginTop: isMobile ? '15px' : '20px',
+                        padding: isMobile ? '12px 16px' : '14px 20px',
+                        backgroundColor: isCopyTrading ? '#f0f9f0' : '#f8f9fa',
+                        borderRadius: '8px',
+                        borderLeft: `4px solid ${isCopyTrading ? '#4CAF50' : '#9e9e9e'}`,
+                        fontSize: isMobile ? '14px' : '15px',
+                        color: isCopyTrading ? '#2e7d32' : '#666',
+                        textAlign: 'center' as const,
+                        fontWeight: '600',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '10px'
+                    }}>
+                        <div style={{
+                            width: '12px',
+                            height: '12px',
+                            backgroundColor: isCopyTrading ? '#4CAF50' : '#9e9e9e',
+                            borderRadius: '50%',
+                            display: 'inline-block'
+                        }}></div>
+                        <span>
+                            Copy Trading: {isCopyTrading ? 'Active' : 'Inactive'}
+                        </span>
+                    </div>
+                )}
+
+                {/* Info Text */}
+                <div style={{
+                    marginTop: isMobile ? '20px' : '25px',
+                    padding: isMobile ? '12px 16px' : '16px 20px',
+                    backgroundColor: '#f8f9fa',
+                    borderRadius: '8px',
+                    borderLeft: '4px solid #2196F3',
+                    fontSize: isMobile ? '13px' : '14px',
+                    color: '#333',
+                    lineHeight: '1.6'
+                }}>
+                    <p style={{ margin: '0 0 8px 0', fontWeight: '600', color: '#0a1aadff' }}>
+                        How to get your API token:
                     </p>
+                    <ol style={{ 
+                        margin: '0', 
+                        paddingLeft: '20px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '6px'
+                    }}>
+                        <li>Go to your Deriv account settings</li>
+                        <li>Navigate to API token section</li>
+                        <li>Generate a new token or copy existing one</li>
+                        <li>Paste it above and click "Save Token"</li>
+                    </ol>
+                    
                 </div>
             </div>
+           
+            {/* Toast Notification */}
+            {toast && (
+                <div style={{
+                    position: 'fixed',
+                    top: isMobile ? '10px' : '20px',
+                    right: isMobile ? '10px' : '20px',
+                    left: isMobile ? '10px' : 'auto',
+                    zIndex: 1000,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: isMobile ? '14px 18px' : '16px 24px',
+                    borderRadius: '10px',
+                    fontWeight: '600',
+                    backgroundColor: toast.type === 'ok' ? '#4CAF50' : '#f44336',
+                    color: 'white',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                    animation: 'slideInRight 0.3s ease',
+                    maxWidth: isMobile ? 'calc(100% - 20px)' : '400px'
+                }}>
+                    <div style={{ fontSize: '20px' }}>
+                        {toast.type === 'ok' ? '✓' : '⚠'}
+                    </div>
+                    <span style={{
+                        flex: 1,
+                        textAlign: 'center',
+                        fontSize: isMobile ? '14px' : '15px'
+                    }}>
+                        {toast.text}
+                    </span>
+                </div>
+            )}
+
+            <style jsx global>{`
+                @keyframes slideInRight {
+                    from {
+                        transform: translateX(100%);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+                
+                /* Mobile optimizations */
+                @media (max-width: 768px) {
+                    input, textarea, select {
+                        font-size: 16px !important; /* Prevent zoom on iOS */
+                    }
+                    
+                    button {
+                        touch-action: manipulation; /* Improve touch response */
+                    }
+                    
+                    /* Improve scrolling on mobile */
+                    body {
+                        -webkit-overflow-scrolling: touch;
+                        overflow-x: hidden;
+                    }
+                }
+            `}</style>
         </div>
     );
 };
 
-export default CopyTrading;
+export default TokenManager;

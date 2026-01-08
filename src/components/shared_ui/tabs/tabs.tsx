@@ -64,23 +64,40 @@ const Tabs = ({
     const [active_line_style, updateActiveLineStyle] = React.useState({});
     const active_tab_ref = React.useRef<HTMLLIElement>(null);
     const tabs_wrapper_ref = React.useRef<HTMLUListElement>(null);
+    const timeout_ref = React.useRef<ReturnType<typeof setTimeout>>();
+    const raf_ref = React.useRef<number>();
     const pushHash = (hash: string) => {
         history.replace(`${history.location.pathname}${window.location.search}#${hash}`);
     };
 
     const setActiveLineStyle = React.useCallback(() => {
-        const tabs_wrapper_bounds = tabs_wrapper_ref?.current?.getBoundingClientRect();
-        const active_tab_bounds = active_tab_ref?.current?.getBoundingClientRect();
-        if (tabs_wrapper_bounds && active_tab_bounds) {
-            updateActiveLineStyle({
-                left: active_tab_bounds.left - tabs_wrapper_bounds.left,
-                width: active_tab_bounds.width,
-            });
-        } else {
-            setTimeout(() => {
-                setActiveLineStyle();
-            }, 500);
+        // Clear any pending timeouts or animation frames
+        if (timeout_ref.current) {
+            clearTimeout(timeout_ref.current);
         }
+        if (raf_ref.current) {
+            cancelAnimationFrame(raf_ref.current);
+        }
+
+        // Use requestAnimationFrame to ensure DOM has updated
+        raf_ref.current = requestAnimationFrame(() => {
+            // Double RAF to ensure layout has completed
+            requestAnimationFrame(() => {
+                const tabs_wrapper_bounds = tabs_wrapper_ref?.current?.getBoundingClientRect();
+                const active_tab_bounds = active_tab_ref?.current?.getBoundingClientRect();
+                if (tabs_wrapper_bounds && active_tab_bounds && tabs_wrapper_bounds.width > 0 && active_tab_bounds.width > 0) {
+                    updateActiveLineStyle({
+                        left: active_tab_bounds.left - tabs_wrapper_bounds.left,
+                        width: active_tab_bounds.width,
+                    });
+                } else {
+                    // If still not ready, retry with a longer delay
+                    timeout_ref.current = setTimeout(() => {
+                        setActiveLineStyle();
+                    }, 100);
+                }
+            });
+        });
     }, []);
 
     let initial_index_to_show = 0;
@@ -105,7 +122,10 @@ const Tabs = ({
                 }
             }
         }
-        setActiveLineStyle();
+        // Delay initial call to ensure DOM is ready
+        setTimeout(() => {
+            setActiveLineStyle();
+        }, 50);
     });
 
     const [active_tab_index, setActiveTabIndex] = React.useState(initial_index_to_show);
@@ -114,7 +134,10 @@ const Tabs = ({
         if (active_tab_index >= 0 && active_index !== active_tab_index) {
             onTabItemClick?.(active_tab_index);
         }
-        setActiveLineStyle();
+        // Delay to ensure refs are updated after state change
+        setTimeout(() => {
+            setActiveLineStyle();
+        }, 10);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [active_tab_index, setActiveLineStyle]);
 
@@ -125,13 +148,52 @@ const Tabs = ({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [active_index]);
 
+    // Add effect to handle window resize and scroll
+    React.useEffect(() => {
+        const handleResize = () => {
+            setActiveLineStyle();
+        };
+
+        const handleScroll = () => {
+            // Debounce scroll events
+            if (timeout_ref.current) {
+                clearTimeout(timeout_ref.current);
+            }
+            timeout_ref.current = setTimeout(() => {
+                setActiveLineStyle();
+            }, 50);
+        };
+
+        window.addEventListener('resize', handleResize);
+        const tabs_wrapper = tabs_wrapper_ref.current;
+        if (tabs_wrapper) {
+            tabs_wrapper.addEventListener('scroll', handleScroll);
+        }
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            if (tabs_wrapper) {
+                tabs_wrapper.removeEventListener('scroll', handleScroll);
+            }
+            if (timeout_ref.current) {
+                clearTimeout(timeout_ref.current);
+            }
+            if (raf_ref.current) {
+                cancelAnimationFrame(raf_ref.current);
+            }
+        };
+    }, [setActiveLineStyle]);
+
     const onClickTabItem = (index: number) => {
         if (should_update_hash) {
             const hash = children[index]?.props['data-hash'];
             pushHash(hash);
         }
         setActiveTabIndex(index);
-        setActiveLineStyle();
+        // Delay to ensure ref assignment happens first
+        setTimeout(() => {
+            setActiveLineStyle();
+        }, 10);
     };
 
     const valid_children = children.filter(child => child);
@@ -208,6 +270,7 @@ const Tabs = ({
                                     'dc-tabs__active-line--fit-content': fit_content,
                                     'dc-tabs__active-line--header-fit-content': header_fit_content,
                                     'dc-tabs__active-line--is-hidden': children.length === 1 && single_tab_has_no_label,
+                                    'dc-tabs__active-line--positioned': Object.keys(active_line_style).length > 0 && active_line_style.width > 0,
                                 })}
                                 style={active_line_style}
                             />

@@ -162,9 +162,10 @@ const AppWrapper = observer(() => {
             const el_id = TAB_IDS[tab_index];
             if (el_id) {
                 const el_tab = document.getElementById(el_id);
+                // Increase delay to ensure tab positioning is complete first
                 setTimeout(() => {
                     el_tab?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-                }, 10);
+                }, 100); // Increased from 10ms to 100ms
             }
         },
         [active_tab]
@@ -201,6 +202,7 @@ const AppWrapper = observer(() => {
                 <div
                     className={classNames('main__container', {
                         'main__container--active': active_tour && active_tab === DASHBOARD && !isDesktop,
+                        'main__container--drawer-open': is_drawer_open && isDesktop,
                     })}
                 >
                     <Tabs

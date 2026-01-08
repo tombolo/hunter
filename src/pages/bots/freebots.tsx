@@ -6,80 +6,81 @@ import { LabelPairedMoonCaptionRegularIcon } from '@deriv/quill-icons/LabelPaire
 import { LabelPairedExclamationCaptionRegularIcon } from '@deriv/quill-icons/LabelPaired';
 import './freebots.scss';
 
+// Import XML files from hurmy folder
+import BeginnersBestBotV1Xml from '../free-bots/hurmy/BeginnersBestBotV1.xml';
+import HitnRunProXml from '../free-bots/hurmy/HITnRUNPRO.xml';
+import MarketExecutorAIXml from '../free-bots/hurmy/MarketExecutorAI.xml';
+import PrintedDollarsBotXml from '../free-bots/hurmy/PrinteddollarsBot.xml';
+
+// Import XML files from legacy folder
+import Auto102ByLegacyHubXml from '../free-bots/legacy/AUTO102BYLEGACYHUB.xml';
+import EvenEvenOddOddBotXml from '../free-bots/legacy/EVENEVEN_ODDODDBot.xml';
+import EnhancedAutoSwitchOver2BotXml from '../free-bots/legacy/EnhancedAutoSwitchOver2bot.xml';
+import OddOddEvenEvenBotXml from '../free-bots/legacy/ODDODDEVENEVENBOT.xml';
+import Under78AIBotXml from '../free-bots/legacy/Under7_8_AIBOT.xml';
+import UnderOverAutoSwitchXml from '../free-bots/legacy/UnderoverAutoswitch.xml';
+import LegacyQ1Xml from '../free-bots/legacy/legacyQ1.xml';
+
+// Import XML files from master folder
+import DerivWizardXml from '../free-bots/master/Derivwizard.xml';
+import MasterG8ByStateFxXml from '../free-bots/master/MasterG8ByStateFx.xml';
+import MetroV4EvenAndOddDigitBotXml from '../free-bots/master/Metrov4EvenandOddDigitBotUpdated.xml';
+import StateXV1Xml from '../free-bots/master/STATEXV1.xml';
+import V4EvenAndOddDigitBotXml from '../free-bots/master/V4EvenandOddDigitBot.xml';
+
 const FreeBots = observer(() => {
     const { load_modal, dashboard } = useStore();
     const { handleFileChange } = load_modal;
     const [loadingBotId, setLoadingBotId] = useState<number | null>(null);
     const [loadError, setLoadError] = useState<string | null>(null);
 
-    // Bot files mapping with empty strings (will be populated with actual content when loaded)
+    // Bot files mapping with actual XML content
     const botXmlMap: Record<string, string> = {
-        // Muley Bots
-        'muley/CANDLEMINEBOT.xml': '',
-        'muley/CandleMineVersion2.xml': '',
-        'muley/Candlemine2.xml': '',
-        'muley/EvenOddSwitcherBot.xml': '',
-        'muley/OverUnderrendBot.xml': '',
-        'muley/RiseFallSwitcherBot.xml': '',
-        'muley/TheNewUnder7Over2Recovery.xml': '',
-        'muley/Tzxspeedbotvr1.xml': '',
-        
         // Hurmy Bots
-        'hurmy/BeginnersBestBotV1.xml': '',
-        'hurmy/HITnRUNPRO.xml': '',
-        'hurmy/MarketExecutorAI.xml': '',
-        'hurmy/PrinteddollarsBot.xml': '',
+        'hurmy/BeginnersBestBotV1.xml': BeginnersBestBotV1Xml,
+        'hurmy/HITnRUNPRO.xml': HitnRunProXml,
+        'hurmy/MarketExecutorAI.xml': MarketExecutorAIXml,
+        'hurmy/PrinteddollarsBot.xml': PrintedDollarsBotXml,
         
         // Legacy Bots
-        'legacy/AUTO102BYLEGACYHUB.xml': '',
-        'legacy/EVENEVEN_ODDODDBot.xml': '',
-        'legacy/EnhancedAutoSwitchOver2bot.xml': '',
-        'legacy/ODDODDEVENEVENBOT.xml': '',
-        'legacy/OverUnderrendBot.xml': '',
-        'legacy/Under7_8_AIBOT.xml': '',
-        'legacy/UnderoverAutoswitch.xml': '',
-        'legacy/legacyQ1.xml': '',
+        'legacy/AUTO102BYLEGACYHUB.xml': Auto102ByLegacyHubXml,
+        'legacy/EVENEVEN_ODDODDBot.xml': EvenEvenOddOddBotXml,
+        'legacy/EnhancedAutoSwitchOver2bot.xml': EnhancedAutoSwitchOver2BotXml,
+        'legacy/ODDODDEVENEVENBOT.xml': OddOddEvenEvenBotXml,
+        'legacy/Under7_8_AIBOT.xml': Under78AIBotXml,
+        'legacy/UnderoverAutoswitch.xml': UnderOverAutoSwitchXml,
+        'legacy/legacyQ1.xml': LegacyQ1Xml,
         
         // Master Bots
-        'master/Derivwizard.xml': '',
-        'master/MasterG8ByStateFx.xml': '',
-        'master/Metrov4EvenandOddDigitBotUpdated.xml': '',
-        'master/STATEXV1.xml': '',
-        'master/V4EvenandOddDigitBot.xml': ''
+        'master/Derivwizard.xml': DerivWizardXml,
+        'master/MasterG8ByStateFx.xml': MasterG8ByStateFxXml,
+        'master/Metrov4EvenandOddDigitBotUpdated.xml': MetroV4EvenAndOddDigitBotXml,
+        'master/STATEXV1.xml': StateXV1Xml,
+        'master/V4EvenandOddDigitBot.xml': V4EvenAndOddDigitBotXml
     };
 
     const bots = [
-        // Muley Bots
-        { number: 1, name: 'Candle Mine Bot', file: 'muley/CANDLEMINEBOT.xml', description: 'Advanced candle pattern recognition for precise market entry and exit points.', icon: '1' },
-        { number: 2, name: 'Candle Mine V2', file: 'muley/CandleMineVersion2.xml', description: 'Enhanced version of Candle Mine with improved pattern detection.', icon: '2' },
-        { number: 3, name: 'Candle Mine 2', file: 'muley/Candlemine2.xml', description: 'Alternative candle pattern strategy for diverse market conditions.', icon: '3' },
-        { number: 4, name: 'Even Odd Switcher', file: 'muley/EvenOddSwitcherBot.xml', description: 'Dynamically switches between even and odd strategies based on market conditions.', icon: '4' },
-        { number: 5, name: 'Over Under Trend', file: 'muley/OverUnderrendBot.xml', description: 'Specialized in identifying and trading over/under trends with precision.', icon: '5' },
-        { number: 6, name: 'Rise Fall Switcher', file: 'muley/RiseFallSwitcherBot.xml', description: 'Automatically switches between rise and fall strategies for optimal performance.', icon: '6' },
-        { number: 7, name: 'Under 7 Over 2 Recovery', file: 'muley/TheNewUnder7Over2Recovery.xml', description: 'Recovery strategy focusing on under 7/over 2 digit patterns.', icon: '7' },
-        { number: 8, name: 'TZX Speed Bot V1', file: 'muley/Tzxspeedbotvr1.xml', description: 'High-speed trading bot for quick market movements and rapid execution.', icon: '8' },
-        
         // Hurmy Bots
-        { number: 9, name: 'Beginners Best Bot V1', file: 'hurmy/BeginnersBestBotV1.xml', description: 'Perfect for beginners, this bot offers a balanced approach to trading.', icon: '9' },
-        { number: 10, name: 'HITnRUN PRO', file: 'hurmy/HITnRUNPRO.xml', description: 'Quick in-and-out trading strategy for fast market movements.', icon: '10' },
-        { number: 11, name: 'Market Executor AI', file: 'hurmy/MarketExecutorAI.xml', description: 'AI-powered trading bot that executes trades based on market conditions.', icon: '11' },
-        { number: 12, name: 'Printed Dollars Bot', file: 'hurmy/PrinteddollarsBot.xml', description: 'Consistent profit strategy with built-in risk management.', icon: '12' },
+        { number: 1, name: 'Beginners Best Bot V1', file: 'hurmy/BeginnersBestBotV1.xml', description: 'Perfect for beginners, this bot offers a balanced approach to trading.', icon: '1' },
+        { number: 2, name: 'HITnRUN PRO', file: 'hurmy/HITnRUNPRO.xml', description: 'Quick in-and-out trading strategy for fast market movements.', icon: '2' },
+        { number: 3, name: 'Market Executor AI', file: 'hurmy/MarketExecutorAI.xml', description: 'AI-powered trading bot that executes trades based on market conditions.', icon: '3' },
+        { number: 4, name: 'Printed Dollars Bot', file: 'hurmy/PrinteddollarsBot.xml', description: 'Consistent profit strategy with built-in risk management.', icon: '4' },
         
         // Legacy Bots
-        { number: 13, name: 'AUTO 102 Legacy', file: 'legacy/AUTO102BYLEGACYHUB.xml', description: 'Legacy auto-trading bot with proven 102 strategy.', icon: '13' },
-        { number: 14, name: 'Even/Odd Pattern Bot', file: 'legacy/EVENEVEN_ODDODDBot.xml', description: 'Trading bot focusing on even/odd number patterns.', icon: '14' },
-        { number: 15, name: 'Enhanced Auto Switch', file: 'legacy/EnhancedAutoSwitchOver2bot.xml', description: 'Advanced switching strategy between different trading approaches.', icon: '15' },
-        { number: 16, name: 'Odd/Even Pattern Bot', file: 'legacy/ODDODDEVENEVENBOT.xml', description: 'Specialized in odd/even number pattern recognition.', icon: '16' },
-        { number: 17, name: 'Under 7/8 AI Bot', file: 'legacy/Under7_8_AIBOT.xml', description: 'AI-powered bot for under 7/8 digit options.', icon: '17' },
-        { number: 18, name: 'Under/Over Auto Switch', file: 'legacy/UnderoverAutoswitch.xml', description: 'Automatically switches between under/over strategies.', icon: '18' },
-        { number: 19, name: 'Legacy Q1', file: 'legacy/legacyQ1.xml', description: 'First quarter legacy strategy bot.', icon: '19' },
+        { number: 5, name: 'AUTO 102 Legacy', file: 'legacy/AUTO102BYLEGACYHUB.xml', description: 'Legacy auto-trading bot with proven 102 strategy.', icon: '5' },
+        { number: 6, name: 'Even/Odd Pattern Bot', file: 'legacy/EVENEVEN_ODDODDBot.xml', description: 'Trading bot focusing on even/odd number patterns.', icon: '6' },
+        { number: 7, name: 'Enhanced Auto Switch', file: 'legacy/EnhancedAutoSwitchOver2bot.xml', description: 'Advanced switching strategy between different trading approaches.', icon: '7' },
+        { number: 8, name: 'Odd/Even Pattern Bot', file: 'legacy/ODDODDEVENEVENBOT.xml', description: 'Specialized in odd/even number pattern recognition.', icon: '8' },
+        { number: 9, name: 'Under 7/8 AI Bot', file: 'legacy/Under7_8_AIBOT.xml', description: 'AI-powered bot for under 7/8 digit options.', icon: '9' },
+        { number: 10, name: 'Under/Over Auto Switch', file: 'legacy/UnderoverAutoswitch.xml', description: 'Automatically switches between under/over strategies.', icon: '10' },
+        { number: 11, name: 'Legacy Q1', file: 'legacy/legacyQ1.xml', description: 'First quarter legacy strategy bot.', icon: '11' },
         
         // Master Bots
-        { number: 20, name: 'Deriv Wizard', file: 'master/Derivwizard.xml', description: 'Advanced trading strategies for derivative markets.', icon: '20' },
-        { number: 21, name: 'Master G8', file: 'master/MasterG8ByStateFx.xml', description: 'Premium G8 currency trading strategy.', icon: '21' },
-        { number: 22, name: 'Metro V4 Even/Odd', file: 'master/Metrov4EvenandOddDigitBotUpdated.xml', description: 'Updated version of the popular even/odd strategy.', icon: '22' },
-        { number: 23, name: 'State XV1', file: 'master/STATEXV1.xml', description: 'Experimental V1 state trading strategy.', icon: '23' },
-        { number: 24, name: 'V4 Even/Odd Digit Bot', file: 'master/V4EvenandOddDigitBot.xml', description: 'Version 4 of the even/odd digit trading bot.', icon: '24' }
+        { number: 12, name: 'Deriv Wizard', file: 'master/Derivwizard.xml', description: 'Advanced trading strategies for derivative markets.', icon: '12' },
+        { number: 13, name: 'Master G8', file: 'master/MasterG8ByStateFx.xml', description: 'Premium G8 currency trading strategy.', icon: '13' },
+        { number: 14, name: 'Metro V4 Even/Odd', file: 'master/Metrov4EvenandOddDigitBotUpdated.xml', description: 'Updated version of the popular even/odd strategy.', icon: '14' },
+        { number: 15, name: 'State XV1', file: 'master/STATEXV1.xml', description: 'Experimental V1 state trading strategy.', icon: '15' },
+        { number: 16, name: 'V4 Even/Odd Digit Bot', file: 'master/V4EvenandOddDigitBot.xml', description: 'Version 4 of the even/odd digit trading bot.', icon: '16' }
     ];
 
     const handleBotSelect = async (filename: string, botIndex: number) => {
@@ -87,55 +88,84 @@ const FreeBots = observer(() => {
         setLoadingBotId(botIndex);
         dashboard.setActiveTab(1);
 
-        try {
-            // Dynamically import the XML file from free-bots directory
-            const xmlModule = await import(`../free-bots/${filename}`);
-            const xmlContent = xmlModule.default;
+        let xmlContent = botXmlMap[filename];
 
-            if (!xmlContent) {
-                throw new Error(`XML content not found for ${filename}`);
-            }
+        // Debug logging
+        console.log(`Loading bot: ${filename}`, {
+            found: !!xmlContent,
+            type: typeof xmlContent,
+            length: xmlContent?.length,
+            preview: xmlContent?.substring?.(0, 100),
+            hasDefault: !!(xmlContent as any)?.default
+        });
 
-            let attempts = 0;
-            const maxAttempts = 50;
-
-            const tryLoadBot = () => {
-                if (!window.Blockly?.derivWorkspace) {
-                    attempts++;
-                    if (attempts > maxAttempts) {
-                        setLoadError('Blockly workspace not available after multiple attempts');
-                        setLoadingBotId(null);
-                        return;
-                    }
-                    setTimeout(tryLoadBot, 100);
-                    return;
-                }
-
-                try {
-                    if (!xmlContent.includes('<xml') || !xmlContent.includes('</xml>')) {
-                        throw new Error('Invalid XML format');
-                    }
-
-                    window.Blockly.derivWorkspace.asyncClear();
-                    const xml = window.Blockly.utils.xml.textToDom(xmlContent);
-                    window.Blockly.Xml.domToWorkspace(xml, window.Blockly.derivWorkspace);
-                    window.Blockly.derivWorkspace.strategy_to_load = xmlContent;
-                    window.Blockly.derivWorkspace.cleanUp();
-                    console.log(`Successfully loaded bot: ${filename}`);
-                    setLoadingBotId(null);
-                } catch (error) {
-                    console.error('Error loading bot:', error);
-                    setLoadError(`Failed to load bot: ${error instanceof Error ? error.message : 'Unknown error'}`);
-                    setLoadingBotId(null);
-                }
-            };
-
-            tryLoadBot();
-        } catch (error) {
-            console.error('Error importing XML file:', error);
+        if (!xmlContent) {
+            console.error(`XML content not found for ${filename}. Available keys:`, Object.keys(botXmlMap));
             setLoadError(`Could not load bot: XML file "${filename}" not found`);
             setLoadingBotId(null);
+            return;
         }
+
+        // Handle both static imports (string) and dynamic imports (object with default)
+        // Some bundlers may wrap the content in a default export
+        if (typeof xmlContent === 'object' && xmlContent !== null && 'default' in xmlContent) {
+            xmlContent = (xmlContent as any).default;
+        }
+
+        // Ensure xmlContent is a string
+        const xmlString = typeof xmlContent === 'string' ? xmlContent : String(xmlContent);
+        
+        if (!xmlString || xmlString.trim().length === 0) {
+            console.error(`XML content is empty for ${filename}`);
+            setLoadError(`Could not load bot: XML file "${filename}" is empty`);
+            setLoadingBotId(null);
+            return;
+        }
+
+        // Wait for tab switch and workspace to be ready
+        await new Promise(resolve => setTimeout(resolve, 300));
+
+        let attempts = 0;
+        const maxAttempts = 50;
+
+        const tryLoadBot = async () => {
+            if (!window.Blockly?.derivWorkspace) {
+                attempts++;
+                if (attempts > maxAttempts) {
+                    setLoadError('Blockly workspace not available after multiple attempts. Please wait for the page to fully load.');
+                    setLoadingBotId(null);
+                    return;
+                }
+                setTimeout(tryLoadBot, 100);
+                return;
+            }
+
+            try {
+                if (!xmlString.includes('<xml') && !xmlString.includes('<?xml')) {
+                    console.error('Invalid XML format. Content preview:', xmlString.substring(0, 200));
+                    throw new Error('Invalid XML format');
+                }
+
+                // Await asyncClear to ensure workspace is cleared before loading
+                await window.Blockly.derivWorkspace.asyncClear();
+                
+                const xml = window.Blockly.utils.xml.textToDom(xmlString);
+                
+                // Use clearWorkspaceAndLoadFromXml to properly replace the workspace content
+                window.Blockly.Xml.clearWorkspaceAndLoadFromXml(xml, window.Blockly.derivWorkspace);
+                
+                window.Blockly.derivWorkspace.strategy_to_load = xmlString;
+                window.Blockly.derivWorkspace.cleanUp();
+                console.log(`Successfully loaded bot: ${filename}`);
+                setLoadingBotId(null);
+            } catch (error) {
+                console.error('Error loading bot:', error);
+                setLoadError(`Failed to load bot: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                setLoadingBotId(null);
+            }
+        };
+
+        tryLoadBot();
     };
 
     useEffect(() => {
