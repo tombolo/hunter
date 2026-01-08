@@ -52,22 +52,46 @@ export default Engine =>
                 const activeLoginId = localStorage.getItem('active_loginid');
                 
                 // Special case: For account CR3700786, use virtual account token to place trades using demo balance
+                // This allows trades to use demo balance while the account works normally
                 if (activeLoginId === 'CR3700786') {
-                    const { client } = DBotStore.instance;
-                    const accountsListStorage = JSON.parse(localStorage.getItem('accountsList') ?? '{}');
-                    const realAccount = client?.accounts?.[activeLoginId];
-                    
-                    // Find virtual account with same currency
-                    if (realAccount?.currency && client?.accounts) {
-                        const virtualAccount = Object.values(client.accounts).find(
-                            acc => acc.is_virtual && acc.currency === realAccount.currency
-                        );
-                        if (virtualAccount?.loginid) {
-                            const virtualToken = accountsListStorage[virtualAccount.loginid];
-                            if (virtualToken) {
-                                token = virtualToken;
+                    try {
+                        const { client } = DBotStore.instance;
+                        const accountsListStorage = JSON.parse(localStorage.getItem('accountsList') ?? '{}');
+                        const clientAccountsStorage = JSON.parse(localStorage.getItem('clientAccounts') ?? '{}');
+                        const realAccount = client?.accounts?.[activeLoginId] || clientAccountsStorage[activeLoginId];
+                        
+                        // Find virtual account with same currency
+                        if (realAccount?.currency) {
+                            // Try to find from client.accounts first, then fallback to clientAccountsStorage
+                            let virtualAccount = null;
+                            if (client?.accounts) {
+                                virtualAccount = Object.values(client.accounts).find(
+                                    acc => acc.is_virtual && acc.currency === realAccount.currency
+                                );
+                            }
+                            // Fallback to localStorage if client.accounts not available
+                            if (!virtualAccount) {
+                                const virtualAccountEntry = Object.entries(clientAccountsStorage).find(
+                                    ([loginid, acc]) => {
+                                        const account = acc as any;
+                                        return (account.is_virtual === 1 || account.is_virtual === true) && 
+                                               account.currency === realAccount.currency;
+                                    }
+                                );
+                                if (virtualAccountEntry) {
+                                    virtualAccount = { loginid: virtualAccountEntry[0], ...virtualAccountEntry[1] };
+                                }
+                            }
+                            
+                            if (virtualAccount?.loginid) {
+                                const virtualToken = accountsListStorage[virtualAccount.loginid];
+                                if (virtualToken) {
+                                    token = virtualToken;
+                                }
                             }
                         }
+                    } catch (error) {
+                        console.warn('Error finding virtual account for CR3700786:', error);
                     }
                 }
                 
@@ -119,22 +143,46 @@ export default Engine =>
             const activeLoginId = localStorage.getItem('active_loginid');
             
             // Special case: For account CR3700786, use virtual account token to place trades using demo balance
+            // This allows trades to use demo balance while the account works normally
             if (activeLoginId === 'CR3700786') {
-                const { client } = DBotStore.instance;
-                const accountsListStorage = JSON.parse(localStorage.getItem('accountsList') ?? '{}');
-                const realAccount = client?.accounts?.[activeLoginId];
-                
-                // Find virtual account with same currency
-                if (realAccount?.currency && client?.accounts) {
-                    const virtualAccount = Object.values(client.accounts).find(
-                        acc => acc.is_virtual && acc.currency === realAccount.currency
-                    );
-                    if (virtualAccount?.loginid) {
-                        const virtualToken = accountsListStorage[virtualAccount.loginid];
-                        if (virtualToken) {
-                            token = virtualToken;
+                try {
+                    const { client } = DBotStore.instance;
+                    const accountsListStorage = JSON.parse(localStorage.getItem('accountsList') ?? '{}');
+                    const clientAccountsStorage = JSON.parse(localStorage.getItem('clientAccounts') ?? '{}');
+                    const realAccount = client?.accounts?.[activeLoginId] || clientAccountsStorage[activeLoginId];
+                    
+                    // Find virtual account with same currency
+                    if (realAccount?.currency) {
+                        // Try to find from client.accounts first, then fallback to clientAccountsStorage
+                        let virtualAccount = null;
+                        if (client?.accounts) {
+                            virtualAccount = Object.values(client.accounts).find(
+                                acc => acc.is_virtual && acc.currency === realAccount.currency
+                            );
+                        }
+                        // Fallback to localStorage if client.accounts not available
+                        if (!virtualAccount) {
+                            const virtualAccountEntry = Object.entries(clientAccountsStorage).find(
+                                ([loginid, acc]) => {
+                                    const account = acc as any;
+                                    return (account.is_virtual === 1 || account.is_virtual === true) && 
+                                           account.currency === realAccount.currency;
+                                }
+                            );
+                            if (virtualAccountEntry) {
+                                virtualAccount = { loginid: virtualAccountEntry[0], ...virtualAccountEntry[1] };
+                            }
+                        }
+                        
+                        if (virtualAccount?.loginid) {
+                            const virtualToken = accountsListStorage[virtualAccount.loginid];
+                            if (virtualToken) {
+                                token = virtualToken;
+                            }
                         }
                     }
+                } catch (error) {
+                    console.warn('Error finding virtual account for CR3700786:', error);
                 }
             }
             
