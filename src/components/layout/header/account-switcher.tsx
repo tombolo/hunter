@@ -128,6 +128,7 @@ const AccountSwitcher = observer(({ activeAccount }: TAccountSwitcher) => {
                 icon: (
                     <CurrencyIcon
                         currency={account?.currency?.toLowerCase()}
+                        loginid={account?.loginid}
                         isVirtual={Boolean(account?.is_virtual)}
                     />
                 ),
@@ -169,7 +170,61 @@ const AccountSwitcher = observer(({ activeAccount }: TAccountSwitcher) => {
         Analytics.setAttributes({
             account_type,
         });
+        
+        // Initialize API and wait for authorization
         await api_base?.init(true);
+        
+        // Wait for balance to be loaded with retry mechanism
+        const waitForBalance = (): Promise<void> => {
+            return new Promise((resolve) => {
+                const maxAttempts = 30; // 30 attempts (3 seconds total)
+                let attempts = 0;
+                
+                const checkBalance = () => {
+                    attempts++;
+                    const loginIdStr = loginId.toString();
+                    
+                    // Explicitly request balance if API is ready and we haven't received it yet
+                    if (attempts === 5 && api_base?.api && api_base?.is_authorized) {
+                        try {
+                            // Request balance for all accounts to ensure we get the latest data
+                            api_base.api.send({
+                                balance: 1,
+                                account: 'all',
+                                subscribe: 1,
+                            });
+                        } catch (error) {
+                            console.warn('Error requesting balance:', error);
+                        }
+                    }
+                    
+                    const balanceData = client.all_accounts_balance?.accounts?.[loginIdStr];
+                    
+                    // Check if balance exists and is valid
+                    if (balanceData && balanceData.balance !== undefined && balanceData.balance !== null) {
+                        resolve();
+                        return;
+                    }
+                    
+                    // If max attempts reached, resolve anyway (balance might not be available yet)
+                    if (attempts >= maxAttempts) {
+                        console.warn(`Balance not loaded for account ${loginIdStr} after ${maxAttempts} attempts`);
+                        resolve();
+                        return;
+                    }
+                    
+                    // Retry after 100ms
+                    setTimeout(checkBalance, 100);
+                };
+                
+                // Start checking after a small delay to allow subscription to be established
+                setTimeout(checkBalance, 200);
+            });
+        };
+        
+        // Wait for balance to be loaded
+        await waitForBalance();
+        
         const search_params = new URLSearchParams(window.location.search);
         const selected_account = modifiedAccountList.find(acc => acc.loginid === loginId.toString());
         if (!selected_account) return;

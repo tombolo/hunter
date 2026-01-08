@@ -33,8 +33,10 @@ export const AccountSwitcherWalletItem = observer(
 
         const {
             ui: { is_dark_mode_on },
-            client: { loginid: active_loginid, is_eu },
+            client,
         } = useStore();
+        
+        const { loginid: active_loginid, is_eu } = client;
 
         const theme = is_dark_mode_on ? 'dark' : 'light';
         const app_icon = is_dark_mode_on ? 'IcWalletOptionsDark' : 'IcWalletOptionsLight';
@@ -69,6 +71,59 @@ export const AccountSwitcherWalletItem = observer(
                 account_type,
             });
             await api_base?.init(true);
+            
+            // Wait for balance to be loaded with retry mechanism
+            const waitForBalance = (): Promise<void> => {
+                return new Promise((resolve) => {
+                    const maxAttempts = 30; // 30 attempts (3 seconds total)
+                    let attempts = 0;
+                    
+                    const checkBalance = () => {
+                        attempts++;
+                        const loginIdStr = loginId.toString();
+                        
+                        // Explicitly request balance if API is ready and we haven't received it yet
+                        if (attempts === 5 && api_base?.api && api_base?.is_authorized) {
+                            try {
+                                // Request balance for all accounts to ensure we get the latest data
+                                api_base.api.send({
+                                    balance: 1,
+                                    account: 'all',
+                                    subscribe: 1,
+                                });
+                            } catch (error) {
+                                console.warn('Error requesting balance:', error);
+                            }
+                        }
+                        
+                        // Access client store directly to get current reactive value
+                        const balanceData = client?.all_accounts_balance?.accounts?.[loginIdStr];
+                        
+                        // Check if balance exists and is valid
+                        if (balanceData && balanceData.balance !== undefined && balanceData.balance !== null) {
+                            resolve();
+                            return;
+                        }
+                        
+                        // If max attempts reached, resolve anyway (balance might not be available yet)
+                        if (attempts >= maxAttempts) {
+                            console.warn(`Balance not loaded for account ${loginIdStr} after ${maxAttempts} attempts`);
+                            resolve();
+                            return;
+                        }
+                        
+                        // Retry after 100ms
+                        setTimeout(checkBalance, 100);
+                    };
+                    
+                    // Start checking after a small delay to allow subscription to be established
+                    setTimeout(checkBalance, 200);
+                });
+            };
+            
+            // Wait for balance to be loaded
+            await waitForBalance();
+            
             closeAccountsDialog();
 
             const client_accounts = JSON.parse(localStorage.getItem('clientAccounts') ?? '{}');

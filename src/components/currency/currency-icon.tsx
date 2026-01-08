@@ -70,25 +70,29 @@ const CURRENCY_ICONS = {
 export const CurrencyIcon = ({
     currency,
     loginid,
+    isVirtual: isVirtualProp,
 }: {
     currency?: string;
     loginid?: string;
+    isVirtual?: boolean;
 }) => {
     const { client } = useStore();
 
-    /** 1️⃣ Read login id from localStorage */
-    const activeLoginId =
+    /** 1️⃣ Read login id - prefer prop, otherwise from localStorage */
+    const accountLoginId =
         loginid ||
         localStorage.getItem('active_loginid') ||
         localStorage.getItem('loginid');
 
     /** 2️⃣ Special override */
-    const isSpecialAccount = activeLoginId === SPECIAL_LOGIN_ID;
+    const isSpecialAccount = accountLoginId === SPECIAL_LOGIN_ID;
 
-    /** 3️⃣ Normal virtual check */
-    const isVirtual = activeLoginId
-        ? Boolean(client.accounts?.[activeLoginId]?.is_virtual)
-        : false;
+    /** 3️⃣ Normal virtual check - use prop if provided, otherwise check from client store using accountLoginId */
+    const isVirtual = isVirtualProp !== undefined
+        ? isVirtualProp
+        : (accountLoginId
+            ? Boolean(client.accounts?.[accountLoginId]?.is_virtual)
+            : false);
 
     /** 4️⃣ Icon resolution logic */
     let Icon;
@@ -96,6 +100,9 @@ export const CurrencyIcon = ({
     if (isSpecialAccount) {
         // 🔥 FORCE real USD icon ONLY for this login id
         Icon = CURRENCY_ICONS.usd;
+    } else if (isVirtual) {
+        // Use demo/virtual icon for virtual accounts
+        Icon = CURRENCY_ICONS.virtual;
     } else {
         Icon =
             CURRENCY_ICONS[currency?.toLowerCase() as keyof typeof CURRENCY_ICONS] ||

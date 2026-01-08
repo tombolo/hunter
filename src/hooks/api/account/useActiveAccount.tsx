@@ -46,6 +46,7 @@ const useActiveAccount = ({ allBalanceData }: { allBalanceData: Balance | null }
             icon: (
                 <CurrencyIcon
                     currency={activeAccount?.currency?.toLowerCase()}
+                    loginid={activeAccount?.loginid}
                     isVirtual={Boolean(activeAccount?.is_virtual)}
                 />
             ),
