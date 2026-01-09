@@ -140,82 +140,135 @@ const AccountSwitcher = observer(({ activeAccount }: TAccountSwitcher) => {
 
     const switchAccount = async (loginId: number) => {
         if (loginId.toString() === activeAccount?.loginid) return;
+        
         const account_list = JSON.parse(localStorage.getItem('accountsList') ?? '{}');
         const token = account_list[loginId];
-        if (!token) return;
-        localStorage.setItem('authToken', token);
-        localStorage.setItem('active_loginid', loginId.toString());
-        const account_type =
-            loginId
-                .toString()
-                .match(/[a-zA-Z]+/g)
-                ?.join('') || '';
+        if (!token) {
+            console.error(`No token found for account ${loginId}`);
+            return;
+        }
+        
+        const loginIdStr = loginId.toString();
+        
+        try {
+            localStorage.setItem('authToken', token);
+            localStorage.setItem('active_loginid', loginIdStr);
+            const account_type =
+                loginId
+                    .toString()
+                    .match(/[a-zA-Z]+/g)
+                    ?.join('') || '';
 
-        Analytics.setAttributes({
-            account_type,
-        });
-        
-        // Initialize API and wait for authorization
-        await api_base?.init(true);
-        
-        // Wait for balance to be loaded with retry mechanism
-        const waitForBalance = (): Promise<void> => {
-            return new Promise((resolve) => {
-                const maxAttempts = 30; // 30 attempts (3 seconds total)
-                let attempts = 0;
-                
-                const checkBalance = () => {
-                    attempts++;
-                    const loginIdStr = loginId.toString();
-                    
-                    // Explicitly request balance if API is ready and we haven't received it yet
-                    if (attempts === 5 && api_base?.api && api_base?.is_authorized) {
-                        try {
-                            // Request balance for all accounts to ensure we get the latest data
-                            api_base.api.send({
-                                balance: 1,
-                                account: 'all',
-                                subscribe: 1,
-                            });
-                        } catch (error) {
-                            console.warn('Error requesting balance:', error);
-                        }
-                    }
-                    
-                    const balanceData = client.all_accounts_balance?.accounts?.[loginIdStr];
-                    
-                    // Check if balance exists and is valid
-                    if (balanceData && balanceData.balance !== undefined && balanceData.balance !== null) {
-                        resolve();
-                        return;
-                    }
-                    
-                    // If max attempts reached, resolve anyway (balance might not be available yet)
-                    if (attempts >= maxAttempts) {
-                        console.warn(`Balance not loaded for account ${loginIdStr} after ${maxAttempts} attempts`);
-                        resolve();
-                        return;
-                    }
-                    
-                    // Retry after 100ms
-                    setTimeout(checkBalance, 100);
-                };
-                
-                // Start checking after a small delay to allow subscription to be established
-                setTimeout(checkBalance, 200);
+            Analytics.setAttributes({
+                account_type,
             });
-        };
-        
-        // Wait for balance to be loaded
-        await waitForBalance();
-        
-        const search_params = new URLSearchParams(window.location.search);
-        const selected_account = modifiedAccountList.find(acc => acc.loginid === loginId.toString());
-        if (!selected_account) return;
-        const account_param = selected_account.is_virtual ? 'demo' : selected_account.currency;
-        search_params.set('account', account_param);
-        sessionStorage.setItem('query_param_currency', account_param);
-        window.history.pushState({}, '', `${window.location.pathname}?${search_params.toString()}`);
+            
+            // Initialize API and wait for authorization
+            await api_base?.init(true);
+            
+            // Wait for authorization to complete with timeout
+            const waitForAuthorization = (): Promise<boolean> => {
+                return new Promise((resolve) => {
+                    const maxAttempts = 20; // 2 seconds total
+                    let attempts = 0;
+                    
+                    const checkAuth = () => {
+                        attempts++;
+                        
+                        // Check if authorization is complete
+                        if (api_base?.is_authorized && api_base?.api && api_base.api.connection?.readyState === 1) {
+                            resolve(true);
+                            return;
+                        }
+                        
+                        // If max attempts reached, resolve anyway
+                        if (attempts >= maxAttempts) {
+                            console.warn(`Authorization not completed for account ${loginIdStr} after ${maxAttempts} attempts`);
+                            resolve(false);
+                            return;
+                        }
+                        
+                        // Retry after 100ms
+                        setTimeout(checkAuth, 100);
+                    };
+                    
+                    // Start checking immediately
+                    setTimeout(checkAuth, 100);
+                });
+            };
+            
+            const isAuthorized = await waitForAuthorization();
+            
+            if (!isAuthorized) {
+                console.error(`Failed to authorize account ${loginIdStr}`);
+                // Don't clear tokens - let the user retry
+                return;
+            }
+            
+            // Wait for balance to be loaded with reduced timeout
+            const waitForBalance = (): Promise<void> => {
+                return new Promise((resolve) => {
+                    const maxAttempts = 15; // 1.5 seconds total (reduced from 3 seconds)
+                    let attempts = 0;
+                    
+                    const checkBalance = () => {
+                        attempts++;
+                        
+                        // Explicitly request balance if API is ready and we haven't received it yet
+                        if (attempts === 3 && api_base?.api && api_base?.is_authorized) {
+                            try {
+                                // Request balance for all accounts to ensure we get the latest data
+                                api_base.api.send({
+                                    balance: 1,
+                                    account: 'all',
+                                    subscribe: 1,
+                                });
+                            } catch (error) {
+                                console.warn('Error requesting balance:', error);
+                            }
+                        }
+                        
+                        const balanceData = client.all_accounts_balance?.accounts?.[loginIdStr];
+                        
+                        // Check if balance exists and is valid
+                        if (balanceData && balanceData.balance !== undefined && balanceData.balance !== null) {
+                            resolve();
+                            return;
+                        }
+                        
+                        // If max attempts reached, resolve anyway (balance might not be available yet)
+                        if (attempts >= maxAttempts) {
+                            console.warn(`Balance not loaded for account ${loginIdStr} after ${maxAttempts} attempts, proceeding anyway`);
+                            resolve();
+                            return;
+                        }
+                        
+                        // Retry after 100ms
+                        setTimeout(checkBalance, 100);
+                    };
+                    
+                    // Start checking after a small delay to allow subscription to be established
+                    setTimeout(checkBalance, 150);
+                });
+            };
+            
+            // Wait for balance to be loaded (with reduced timeout)
+            await waitForBalance();
+            
+            const search_params = new URLSearchParams(window.location.search);
+            const selected_account = modifiedAccountList.find(acc => acc.loginid === loginIdStr);
+            if (!selected_account) {
+                console.error(`Account ${loginIdStr} not found in modified account list`);
+                return;
+            }
+            const account_param = selected_account.is_virtual ? 'demo' : selected_account.currency;
+            search_params.set('account', account_param);
+            sessionStorage.setItem('query_param_currency', account_param);
+            window.history.pushState({}, '', `${window.location.pathname}?${search_params.toString()}`);
+        } catch (error) {
+            console.error('Error switching account:', error);
+            // Don't clear tokens on error - let the user retry
+        }
     };
 
     return (

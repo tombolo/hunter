@@ -1,10 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { useStore } from '@/hooks/useStore';
 
-
-const SPECIAL_LOGIN_ID = 'VRTC13260431';
-
-
 const CURRENCY_ICONS = {
     aud: lazy(() => import('@deriv/quill-icons/Currencies').then(module => ({ default: module.CurrencyAudIcon }))),
     bch: lazy(() => import('@deriv/quill-icons/Currencies').then(module => ({ default: module.CurrencyBchIcon }))),
@@ -78,29 +74,23 @@ export const CurrencyIcon = ({
 }) => {
     const { client } = useStore();
 
-    /** 1️⃣ Read login id - prefer prop, otherwise from localStorage */
+    /** Read login id - prefer prop, otherwise from localStorage */
     const accountLoginId =
         loginid ||
         localStorage.getItem('active_loginid') ||
         localStorage.getItem('loginid');
 
-    /** 2️⃣ Special override */
-    const isSpecialAccount = accountLoginId === SPECIAL_LOGIN_ID;
-
-    /** 3️⃣ Normal virtual check - use prop if provided, otherwise check from client store using accountLoginId */
+    /** Virtual check - use prop if provided, otherwise check from client store using accountLoginId */
     const isVirtual = isVirtualProp !== undefined
         ? isVirtualProp
         : (accountLoginId
             ? Boolean(client.accounts?.[accountLoginId]?.is_virtual)
             : false);
 
-    /** 4️⃣ Icon resolution logic */
+    /** Icon resolution logic */
     let Icon;
 
-    if (isSpecialAccount) {
-        // 🔥 FORCE real USD icon ONLY for this login id
-        Icon = CURRENCY_ICONS.usd;
-    } else if (isVirtual) {
+    if (isVirtual) {
         // Use demo/virtual icon for virtual accounts
         Icon = CURRENCY_ICONS.virtual;
     } else {
