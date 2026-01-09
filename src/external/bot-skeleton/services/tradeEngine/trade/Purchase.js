@@ -20,84 +20,24 @@ export default Engine =>
             const onSuccess = response => {
                 // Don't unnecessarily send a forget request for a purchased contract.
                 const { buy_contract_for_multiple_accounts } = response;
-                
-                // When using multiple accounts, find the contract from the virtual account for CR3700786
-                const activeLoginId = localStorage.getItem('active_loginid');
-                let contractResult = buy_contract_for_multiple_accounts.result[0];
-                
-                if (activeLoginId === 'CR3700786' && buy_contract_for_multiple_accounts.result.length > 1) {
-                    // For CR3700786, the first token in the array should be the virtual account token
-                    // So result[0] should be the virtual account contract
-                    // But let's make sure by checking if we have multiple results
-                    contractResult = buy_contract_for_multiple_accounts.result[0];
-                }
-                
                 contractStatus({
                     id: 'contract.purchase_received',
-                    data: contractResult.transaction_id,
+                    data: buy_contract_for_multiple_accounts.result[0].transaction_id,
                     buy_contract_for_multiple_accounts,
                 });
 
-                this.contractId = contractResult.contract_id;
+                this.contractId = buy_contract_for_multiple_accounts.result[0].contract_id;
                 this.store.dispatch(purchaseSuccessful());
 
                 // Explicitly request contract updates to ensure we receive settlement updates
                 // This is especially important when using virtual account token for CR3700786
                 if (this.contractId && api_base.api) {
-                    console.log(`[CR3700786] Contract purchased: ${this.contractId}, setting up monitoring`);
-                    
-                    // Use setTimeout to ensure contract is fully created before subscribing
-                    setTimeout(() => {
-                        // Request the contract explicitly with subscribe to get all updates
-                        try {
-                            api_base.api.send({ 
-                                proposal_open_contract: 1, 
-                                contract_id: this.contractId,
-                                subscribe: 1 
-                            });
-                            console.log(`[CR3700786] Subscribed to contract ${this.contractId} for updates`);
-                            
-                            // Set up periodic polling as a fallback to ensure we get contract updates
-                            // This is important because the contract is on virtual account but we're monitoring from real account
-                            if (activeLoginId === 'CR3700786' && !this.contractPollInterval) {
-                                const contractIdToPoll = this.contractId;
-                                this.contractPollInterval = setInterval(() => {
-                                    if (contractIdToPoll && api_base.api) {
-                                        try {
-                                            // Poll the contract to get latest status
-                                            api_base.api.send({ 
-                                                proposal_open_contract: 1, 
-                                                contract_id: contractIdToPoll 
-                                            }).then((response) => {
-                                                if (response?.proposal_open_contract) {
-                                                    const contract = response.proposal_open_contract;
-                                                    // Check if contract is sold or expired
-                                                    if (contract.is_sold || contract.status !== 'open') {
-                                                        if (this.contractPollInterval) {
-                                                            clearInterval(this.contractPollInterval);
-                                                            this.contractPollInterval = null;
-                                                            console.log(`[CR3700786] Stopped polling - contract ${contract.status}`);
-                                                        }
-                                                    }
-                                                }
-                                            }).catch((error) => {
-                                                console.warn(`[CR3700786] Error polling contract:`, error);
-                                            });
-                                        } catch (error) {
-                                            console.warn(`[CR3700786] Error sending poll request:`, error);
-                                        }
-                                    } else if (!contractIdToPoll && this.contractPollInterval) {
-                                        clearInterval(this.contractPollInterval);
-                                        this.contractPollInterval = null;
-                                        console.log(`[CR3700786] Stopped polling - no contract ID`);
-                                    }
-                                }, 2000); // Poll every 2 seconds
-                                console.log(`[CR3700786] Started polling contract ${contractIdToPoll} every 2 seconds`);
-                            }
-                        } catch (error) {
-                            console.warn(`[CR3700786] Error subscribing to contract ${this.contractId}:`, error);
-                        }
-                    }, 500);
+                    // Request the contract explicitly to ensure we get updates
+                    api_base.api.send({ 
+                        proposal_open_contract: 1, 
+                        contract_id: this.contractId,
+                        subscribe: 1 
+                    });
                 }
 
                 if (this.is_proposal_subscription_required) {
@@ -105,13 +45,13 @@ export default Engine =>
                 }
 
                 delayIndex = 0;
-                log(LogTypes.PURCHASE, { longcode: contractResult.longcode, transaction_id: contractResult.transaction_id });
+                log(LogTypes.PURCHASE, { longcode: buy_contract_for_multiple_accounts.result[0].longcode, transaction_id: buy_contract_for_multiple_accounts.result[0].transaction_id });
                 info({
                     accountID: this.accountInfo.loginid,
                     totalRuns: this.updateAndReturnTotalRuns(),
-                    transaction_ids: { buy: contractResult.transaction_id },
+                    transaction_ids: { buy: buy_contract_for_multiple_accounts.result[0].transaction_id },
                     contract_type,
-                    buy_price: contractResult.buy_price,
+                    buy_price: buy_contract_for_multiple_accounts.result[0].buy_price,
                 });
             };
 
