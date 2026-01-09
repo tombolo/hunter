@@ -106,8 +106,6 @@
             .dc-tabs {
                 width: 100% !important;
                 max-width: 100% !important;
-                height: 80vh !important;
-                max-height: 80vh !important;
 
                 @include mobile-or-tablet-screen {
                     height: calc(100vh - 20rem) !important;
