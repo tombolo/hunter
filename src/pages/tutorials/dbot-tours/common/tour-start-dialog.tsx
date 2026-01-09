@@ -47,6 +47,53 @@ const TourStartDialog = observer(() => {
         }
     }, [is_tnc_needed, is_tour_dialog_visible]);
 
+    // Apply styles directly to ensure tour dialog is centered and has highest z-index
+    React.useEffect(() => {
+        if (is_tour_open) {
+            const modalRoot = document.getElementById('modal_root');
+            const wrapper = document.querySelector('.dc-dialog__wrapper.tour-dialog');
+            const dialog = document.querySelector('.dc-dialog__wrapper.tour-dialog .dc-dialog__dialog');
+
+            if (modalRoot) {
+                modalRoot.style.zIndex = '100010';
+                modalRoot.style.position = 'relative';
+            }
+
+            if (wrapper) {
+                (wrapper as HTMLElement).style.zIndex = '100010';
+                (wrapper as HTMLElement).style.position = 'fixed';
+                (wrapper as HTMLElement).style.top = '0';
+                (wrapper as HTMLElement).style.left = '0';
+                (wrapper as HTMLElement).style.right = '0';
+                (wrapper as HTMLElement).style.bottom = '0';
+                (wrapper as HTMLElement).style.display = 'flex';
+                (wrapper as HTMLElement).style.alignItems = 'center';
+                (wrapper as HTMLElement).style.justifyContent = 'center';
+                (wrapper as HTMLElement).style.padding = '0';
+            }
+
+            if (dialog) {
+                (dialog as HTMLElement).style.position = 'absolute';
+                (dialog as HTMLElement).style.top = '50%';
+                (dialog as HTMLElement).style.left = '50%';
+                (dialog as HTMLElement).style.transform = 'translate(-50%, -50%)';
+                (dialog as HTMLElement).style.zIndex = '100011';
+                (dialog as HTMLElement).style.margin = '0';
+                (dialog as HTMLElement).style.marginTop = '0';
+                
+                if (!isDesktop) {
+                    (dialog as HTMLElement).style.width = '90vw';
+                    (dialog as HTMLElement).style.maxWidth = '90vw';
+                    (dialog as HTMLElement).style.minWidth = 'auto';
+                    (dialog as HTMLElement).style.maxHeight = '80vh';
+                } else {
+                    (dialog as HTMLElement).style.minWidth = '440px';
+                    (dialog as HTMLElement).style.maxWidth = '560px';
+                }
+            }
+        }
+    }, [is_tour_open, isDesktop]);
+
     const getTourContent = () => {
         return (
             <>
