@@ -56,7 +56,7 @@ const Cards = observer(({ is_mobile, has_dashboard_strategies }: TCardProps) => 
                 <img 
                     src={computerSvg} 
                     alt='My Computer' 
-                    style={{ height: '48px', width: '48px' }} 
+                    style={{ height: is_mobile ? '36px' : '48px', width: is_mobile ? '36px' : '48px' }} 
                 />
             ),
             content: is_mobile ? <Localize i18n_default_text='Local' /> : <Localize i18n_default_text='My computer' />,
@@ -72,7 +72,7 @@ const Cards = observer(({ is_mobile, has_dashboard_strategies }: TCardProps) => 
         },
         {
             id: 'google-drive',
-            icon: <img src={driveSvg} alt='Google Drive' style={{ height: '48px', width: '48px' }} />,
+            icon: <img src={driveSvg} alt='Google Drive' style={{ height: is_mobile ? '36px' : '48px', width: is_mobile ? '36px' : '48px' }} />,
             content: <Localize i18n_default_text='Google Drive' />,
             callback: () => {
                 openGoogleDriveDialog();
@@ -86,7 +86,7 @@ const Cards = observer(({ is_mobile, has_dashboard_strategies }: TCardProps) => 
         },
         {
             id: 'bot-builder',
-            icon: <img src={builderSvg} alt='Bot Builder' style={{ height: '48px', width: '48px' }} />,
+            icon: <img src={builderSvg} alt='Bot Builder' style={{ height: is_mobile ? '36px' : '48px', width: is_mobile ? '36px' : '48px' }} />,
             content: <Localize i18n_default_text='Bot builder' />,
             callback: () => {
                 setActiveTab(DBOT_TABS.BOT_BUILDER);
@@ -98,7 +98,7 @@ const Cards = observer(({ is_mobile, has_dashboard_strategies }: TCardProps) => 
         },
         {
             id: 'quick-strategy',
-            icon: <img src={quickstrategySvg} alt='Quick Strategy' style={{ height: '48px', width: '48px' }} />,
+            icon: <img src={quickstrategySvg} alt='Quick Strategy' style={{ height: is_mobile ? '36px' : '48px', width: is_mobile ? '36px' : '48px' }} />,
             content: <Localize i18n_default_text='Quick strategy' />,
             callback: () => {
                 try {
@@ -177,11 +177,12 @@ const Cards = observer(({ is_mobile, has_dashboard_strategies }: TCardProps) => 
                                     styles={{
                                         color: '#1a237e', // blue-900
                                         fontWeight: 500,
-                                        marginTop: '0.5rem',
+                                        marginTop: is_mobile ? '0.25rem' : '0.5rem',
                                         letterSpacing: '-0.01em',
                                         lineHeight: '1',
                                         textAlign: 'center',
-                                        width: '100%'
+                                        width: '100%',
+                                        fontSize: is_mobile ? '0.75rem' : undefined
                                     }}
                                 >
                                     {content}
