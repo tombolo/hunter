@@ -2,16 +2,23 @@
 
 // Ensure modal-root has highest z-index when tour dialog is active
 #modal_root {
-    z-index: 100002 !important;
+    z-index: 100010 !important;
     position: relative;
 }
 
 .tour-dialog {
     transition: unset;
-    z-index: 100002 !important; // Higher than run panel (z-index: 1001) to ensure it's always on top
+    z-index: 100010 !important; // Much higher than run panel (z-index: 1001) to ensure it's always on top
+    position: fixed !important;
+
+    // Override base dialog z-index
+    &.dc-dialog {
+        z-index: 100010 !important;
+        position: fixed !important;
+    }
 
     .dc-dialog__wrapper {
-        z-index: 100002 !important; // Higher than run panel (z-index: 1001)
+        z-index: 100010 !important; // Much higher than run panel (z-index: 1001)
         position: fixed !important;
         top: 0 !important;
         left: 0 !important;
@@ -21,21 +28,24 @@
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        padding: 1rem !important; // Add padding for mobile
+        padding: 0 !important; // Remove padding to allow proper centering
 
         // Override enter/exit states to keep dialog centered
         &--enter,
         &--exit,
         &--enter-done {
             .dc-dialog__dialog {
-                transform: translate3d(0, 0, 0) !important; // Keep centered, no vertical translation
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important; // Center the dialog
             }
         }
 
         @include mobile-screen {
             align-items: center !important;
             justify-content: center !important;
-            padding: 2rem 1rem !important;
+            padding: 0 !important;
         }
     }
 
@@ -43,9 +53,12 @@
         transform: unset !important;
         opacity: unset;
         transition: unset;
-        position: relative !important;
-        z-index: 100003 !important; // Dialog content should be above the overlay
-        margin: 0 !important; // Remove all margins to let flexbox center it
+        position: absolute !important; // Use absolute positioning for better control
+        top: 50% !important; // Center vertically
+        left: 50% !important; // Center horizontally
+        transform: translate(-50%, -50%) !important; // Center the dialog
+        z-index: 100011 !important; // Dialog content should be above the overlay
+        margin: 0 !important; // Remove all margins
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important; // Enhanced shadow for visibility
         display: flex !important;
         align-items: center !important;
@@ -58,20 +71,22 @@
             min-width: auto !important;
             margin: 0 !important; // Remove all margins
             margin-top: 0 !important; // Override base dialog margin-top
-            position: relative !important;
-            top: auto !important;
-            left: auto !important;
+            position: absolute !important;
+            top: 50% !important; // Center vertically
+            left: 50% !important; // Center horizontally
             right: auto !important;
             bottom: auto !important;
-            transform: none !important;
+            transform: translate(-50%, -50%) !important; // Center the dialog
             max-height: 80vh !important;
             overflow-y: auto;
-            align-self: center !important; // Ensure it's centered in flex container
         }
 
         @include desktop-screen {
-            position: relative;
-            margin: 0 auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            margin: 0;
             min-width: 440px;
             max-width: 560px;
         }
