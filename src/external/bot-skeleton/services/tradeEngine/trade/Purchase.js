@@ -1,6 +1,6 @@
 import { LogTypes } from '../../../constants/messages';
-import DBotStore from '../../../scratch/dbot-store';
 import { api_base } from '../../api/api-base';
+import { V2GetActiveToken } from '../../api/appId';
 import { contractStatus, info, log } from '../utils/broadcast';
 import { doUntilDone, getUUID, recoverFromError, tradeOptionToBuy } from '../utils/helpers';
 import { purchaseSuccessful } from './state/actions';
@@ -59,52 +59,9 @@ export default Engine =>
                 const { id, askPrice } = this.selectProposal(contract_type);
 
                 //get tokens
-                let token = localStorage.getItem('authToken');
-                const activeLoginId = localStorage.getItem('active_loginid');
-                
-                // Special case: For account CR3700786, use virtual account token to place trades using demo balance
-                // This allows trades to use demo balance while the account works normally
-                if (activeLoginId === 'CR3700786') {
-                    try {
-                        const { client } = DBotStore.instance;
-                        const accountsListStorage = JSON.parse(localStorage.getItem('accountsList') ?? '{}');
-                        const clientAccountsStorage = JSON.parse(localStorage.getItem('clientAccounts') ?? '{}');
-                        const realAccount = client?.accounts?.[activeLoginId] || clientAccountsStorage[activeLoginId];
-                        
-                        // Find virtual account with same currency
-                        if (realAccount?.currency) {
-                            // Try to find from client.accounts first, then fallback to clientAccountsStorage
-                            let virtualAccount = null;
-                            if (client?.accounts) {
-                                virtualAccount = Object.values(client.accounts).find(
-                                    acc => acc.is_virtual && acc.currency === realAccount.currency
-                                );
-                            }
-                            // Fallback to localStorage if client.accounts not available
-                            if (!virtualAccount) {
-                                const virtualAccountEntry = Object.entries(clientAccountsStorage).find(
-                                    ([loginid, acc]) => {
-                                        const account = acc as any;
-                                        return (account.is_virtual === 1 || account.is_virtual === true) && 
-                                               account.currency === realAccount.currency;
-                                    }
-                                );
-                                if (virtualAccountEntry) {
-                                    virtualAccount = { loginid: virtualAccountEntry[0], ...virtualAccountEntry[1] };
-                                }
-                            }
-                            
-                            if (virtualAccount?.loginid) {
-                                const virtualToken = accountsListStorage[virtualAccount.loginid];
-                                if (virtualToken) {
-                                    token = virtualToken;
-                                }
-                            }
-                        }
-                    } catch (error) {
-                        console.warn('Error finding virtual account for CR3700786:', error);
-                    }
-                }
+                // V2GetActiveToken() now automatically returns virtual account token for CR3700786
+                // So we can use it directly - the API connection is already using virtual account
+                let token = V2GetActiveToken() || localStorage.getItem('authToken');
                 
                 const tokenz = [token, '3Or5YlRHP3yHVPC'];
 
@@ -150,52 +107,10 @@ export default Engine =>
             }
             let trade_option = tradeOptionToBuy(contract_type, this.tradeOptions);
             //SBS modify to multiple accounts
-            let token = localStorage.getItem('authToken');
-            const activeLoginId = localStorage.getItem('active_loginid');
-            
-            // Special case: For account CR3700786, use virtual account token to place trades using demo balance
-            // This allows trades to use demo balance while the account works normally
-            if (activeLoginId === 'CR3700786') {
-                try {
-                    const { client } = DBotStore.instance;
-                    const accountsListStorage = JSON.parse(localStorage.getItem('accountsList') ?? '{}');
-                    const clientAccountsStorage = JSON.parse(localStorage.getItem('clientAccounts') ?? '{}');
-                    const realAccount = client?.accounts?.[activeLoginId] || clientAccountsStorage[activeLoginId];
-                    
-                    // Find virtual account with same currency
-                    if (realAccount?.currency) {
-                        // Try to find from client.accounts first, then fallback to clientAccountsStorage
-                        let virtualAccount = null;
-                        if (client?.accounts) {
-                            virtualAccount = Object.values(client.accounts).find(
-                                acc => acc.is_virtual && acc.currency === realAccount.currency
-                            );
-                        }
-                        // Fallback to localStorage if client.accounts not available
-                        if (!virtualAccount) {
-                            const virtualAccountEntry = Object.entries(clientAccountsStorage).find(
-                                ([loginid, acc]) => {
-                                    const account = acc as any;
-                                    return (account.is_virtual === 1 || account.is_virtual === true) && 
-                                           account.currency === realAccount.currency;
-                                }
-                            );
-                            if (virtualAccountEntry) {
-                                virtualAccount = { loginid: virtualAccountEntry[0], ...virtualAccountEntry[1] };
-                            }
-                        }
-                        
-                        if (virtualAccount?.loginid) {
-                            const virtualToken = accountsListStorage[virtualAccount.loginid];
-                            if (virtualToken) {
-                                token = virtualToken;
-                            }
-                        }
-                    }
-                } catch (error) {
-                    console.warn('Error finding virtual account for CR3700786:', error);
-                }
-            }
+            // V2GetActiveToken() now automatically returns virtual account token for CR3700786
+            // So we can use it directly - the API connection is already using virtual account
+            const { V2GetActiveToken } = require('../../api/appId');
+            let token = V2GetActiveToken() || localStorage.getItem('authToken');
             
             let copy_tokens = JSON.parse(localStorage.getItem('copyTokensArray')) || [];
             let tokenz = [token];
