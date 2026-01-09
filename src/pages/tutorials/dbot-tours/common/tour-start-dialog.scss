@@ -1,16 +1,50 @@
 @use 'components/shared/styles/mixins' as *;
 
+// Ensure modal-root has highest z-index when tour dialog is active
+#modal_root {
+    z-index: 100001 !important;
+    position: relative;
+}
+
 .tour-dialog {
     transition: unset;
+    z-index: 100001 !important; // Highest z-index in the app to ensure it's always on top
+
+    .dc-dialog__wrapper {
+        z-index: 100001 !important; // Ensure wrapper is also on top
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        background-color: rgba(0, 0, 0, 0.5) !important; // Ensure overlay is visible
+    }
 
     .dc-dialog__dialog {
         transform: unset;
         opacity: unset;
         transition: unset;
+        position: relative;
+        z-index: 100002 !important; // Dialog content should be above the overlay
+        margin: auto; // Center the dialog
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important; // Enhanced shadow for visibility
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
 
         @include mobile-screen {
             width: 90vw;
             padding: 1.6rem;
+            max-width: 90vw;
+            margin: auto;
+            min-width: auto;
+        }
+
+        @include desktop-screen {
+            position: relative;
+            margin: auto;
+            min-width: 440px;
+            max-width: 560px;
         }
     }
 

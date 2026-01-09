@@ -36,7 +36,7 @@
 .modal-root:not(:empty) {
     display: flex;
     opacity: 1;
-    z-index: 9998;
+    z-index: 100001; // High z-index to support tour dialog and other modals
 }
 
 strong {
