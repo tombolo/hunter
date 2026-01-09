@@ -252,8 +252,8 @@
                 border: 1px solid rgba(34, 211, 238, 0.5);
                 border-bottom: none;
                 box-shadow: 0 1px 3px rgba(34, 211, 238, 0.35);
-                height: 8px;
-                line-height: 9px;
+                height: 7px;
+                line-height: 8px;
                 position: relative;
                 // Ensure all tabs have equal width using flexbox with max-width constraint
                 flex: 1 1 0 !important;
@@ -304,10 +304,15 @@
                     text-decoration: none;
                     display: flex;
                     align-items: center;
-                    height: 20px;
+                    height: 18px;
                     font-size: 11px;
                     line-height: 1;
                     transition: all 0.15s ease;
+                    
+                    @include mobile-or-tablet-screen {
+                        height: 16px;
+                        padding: 0 1px;
+                    }
                     
                     svg {
                         margin-right: 3px;
@@ -346,7 +351,7 @@
                     #143a3e 80%, 
                     #0f2a2e 100%);
                 justify-content: flex-start;
-                padding: 2px 2px 0;
+                padding: 1px 2px 0;
                 border-radius: 12px 12px 0 0;
                 box-shadow: 
                     0 -4px 20px rgba(34, 211, 238, 0.4),
@@ -354,7 +359,7 @@
                     inset 0 2px 4px rgba(255, 255, 255, 0.08),
                     inset 0 -1px 2px rgba(234, 179, 8, 0.15);
                 margin: 0 0 2px 0;
-                min-height: 12px;
+                min-height: 10px;
                 position: relative;
                 z-index: 1;
                 width: 100%;
@@ -365,7 +370,7 @@
                 display: flex;
                 border: 1px solid rgba(34, 211, 238, 0.35);
                 border-bottom: 2px solid rgba(234, 179, 8, 0.6);
-                overflow: hidden;
+                -webkit-overflow-scrolling: touch;
                 
                 // Animated gradient overlay
                 &::before {
@@ -403,12 +408,30 @@
                 }
 
                 @include mobile-or-tablet-screen {
-                    -ms-overflow-style: none;
-                    scrollbar-width: none;
-                    padding: 2px;
+                    padding: 0.5px 1px 0;
+                    margin-top: -0.5rem;
+                    overflow-x: auto;
+                    overflow-y: hidden;
+                    -webkit-overflow-scrolling: touch;
+                    scrollbar-width: thin;
+                    scrollbar-color: rgba(34, 211, 238, 0.5) transparent;
 
                     &::-webkit-scrollbar {
-                        display: none;
+                        height: 4px;
+                        display: block;
+                    }
+                    
+                    &::-webkit-scrollbar-track {
+                        background: transparent;
+                    }
+                    
+                    &::-webkit-scrollbar-thumb {
+                        background: rgba(34, 211, 238, 0.5);
+                        border-radius: 2px;
+                    }
+                    
+                    &::-webkit-scrollbar-thumb:hover {
+                        background: rgba(34, 211, 238, 0.7);
                     }
                 }
 
@@ -438,8 +461,9 @@
                                 right: auto;
                                 width: 100%;
                                 overflow-x: auto;
-                                padding: 0.8rem 1.6rem 0;
+                                padding: 0.3rem 1.6rem 0;
                                 margin-bottom: 0;
+                                margin-top: -0.5rem;
                             }
                         }
                     }
