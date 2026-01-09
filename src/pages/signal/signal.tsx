@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import './signal.scss';
 
 const AiPage: React.FC = () => {
     const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -16,13 +17,14 @@ const AiPage: React.FC = () => {
     }, []);
 
     return (
-        <div style={{ 
-            width: '100%',
-            height: '87vh',
-            display: 'flex',
-            flexDirection: 'column',
-            marginTop: '4rem'
-        }}>
+        <div 
+            className="signal-page-container"
+            style={{ 
+                width: '100%',
+                height: '87vh',
+                display: 'flex',
+                flexDirection: 'column'
+            }}>
             <iframe
                 ref={iframeRef}
                 src="/sbs/signal.html"

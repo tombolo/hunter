@@ -97,27 +97,11 @@ const AccountSwitcher = observer(({ activeAccount }: TAccountSwitcher) => {
 
     const modifiedAccountList = useMemo(() => {
         return accountList?.map(account => {
-            // Special case: For account CR3700786, use virtual balance instead of real balance
-            let balance = addComma(
+            const balance = addComma(
                 client.all_accounts_balance?.accounts?.[account?.loginid]?.balance?.toFixed(
                     getDecimalPlaces(account.currency)
                 ) ?? '0'
             );
-            
-            if (account?.loginid === 'CR3700786') {
-                // Find the virtual account with the same currency
-                const virtualAccount = accountList?.find(
-                    acc => acc.is_virtual && acc.currency === account?.currency
-                );
-                if (virtualAccount) {
-                    const virtualBalanceData = client.all_accounts_balance?.accounts?.[virtualAccount.loginid];
-                    if (virtualBalanceData) {
-                        balance = addComma(
-                            virtualBalanceData.balance?.toFixed(getDecimalPlaces(virtualBalanceData.currency)) ?? '0'
-                        );
-                    }
-                }
-            }
             
             return {
                 ...account,

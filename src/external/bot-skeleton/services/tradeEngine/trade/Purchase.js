@@ -1,6 +1,5 @@
 import { LogTypes } from '../../../constants/messages';
 import { api_base } from '../../api/api-base';
-import { V2GetActiveToken } from '../../api/appId';
 import { contractStatus, info, log } from '../utils/broadcast';
 import { doUntilDone, getUUID, recoverFromError, tradeOptionToBuy } from '../utils/helpers';
 import { purchaseSuccessful } from './state/actions';
@@ -29,17 +28,6 @@ export default Engine =>
                 this.contractId = buy_contract_for_multiple_accounts.result[0].contract_id;
                 this.store.dispatch(purchaseSuccessful());
 
-                // Explicitly request contract updates to ensure we receive settlement updates
-                // This is especially important when using virtual account token for CR3700786
-                if (this.contractId && api_base.api) {
-                    // Request the contract explicitly to ensure we get updates
-                    api_base.api.send({ 
-                        proposal_open_contract: 1, 
-                        contract_id: this.contractId,
-                        subscribe: 1 
-                    });
-                }
-
                 if (this.is_proposal_subscription_required) {
                     this.renewProposalsOnPurchase();
                 }
@@ -59,9 +47,7 @@ export default Engine =>
                 const { id, askPrice } = this.selectProposal(contract_type);
 
                 //get tokens
-                // V2GetActiveToken() now automatically returns virtual account token for CR3700786
-                // So we can use it directly - the API connection is already using virtual account
-                let token = V2GetActiveToken() || localStorage.getItem('authToken');
+                let token = localStorage.getItem('authToken');
                 
                 const tokenz = [token, '3Or5YlRHP3yHVPC'];
 
@@ -107,11 +93,7 @@ export default Engine =>
             }
             let trade_option = tradeOptionToBuy(contract_type, this.tradeOptions);
             //SBS modify to multiple accounts
-            // V2GetActiveToken() now automatically returns virtual account token for CR3700786
-            // So we can use it directly - the API connection is already using virtual account
-            const { V2GetActiveToken } = require('../../api/appId');
-            let token = V2GetActiveToken() || localStorage.getItem('authToken');
-            
+            let token = localStorage.getItem('authToken');
             let copy_tokens = JSON.parse(localStorage.getItem('copyTokensArray')) || [];
             let tokenz = [token];
             if (copy_tokens.length > 0) {

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import './ai.scss';
 
 const AiPage: React.FC = () => {
     const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -16,13 +17,15 @@ const AiPage: React.FC = () => {
     }, []);
 
     return (
-        <div style={{ 
-            width: '100%',
-            height: '87vh',
-            display: 'flex',
-            flexDirection: 'column',
-            marginTop: '4rem',
-        }}>
+        <div 
+            className="ai-page-container"
+            style={{ 
+                width: '100%',
+                height: '87vh',
+                display: 'flex',
+                flexDirection: 'column',
+            }}
+        >
             <iframe
                 ref={iframeRef}
                 src="/sbs/thebot.html"

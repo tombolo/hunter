@@ -19,25 +19,9 @@ const useActiveAccount = ({ allBalanceData }: { allBalanceData: Balance | null }
     const modifiedAccount = useMemo(() => {
         if (!activeAccount) return undefined;
 
-        // Special case: For account CR3700786, use virtual balance instead of real balance
-        let balance = addComma(
+        const balance = addComma(
             currentBalanceData?.balance?.toFixed(getDecimalPlaces(currentBalanceData?.currency)) ?? '0'
         );
-
-        if (activeAccount.loginid === 'CR3700786') {
-            // Find the virtual account with the same currency
-            const virtualAccount = accountList?.find(
-                acc => acc.is_virtual && acc.currency === activeAccount.currency
-            );
-            if (virtualAccount) {
-                const virtualBalanceData = allBalanceData?.accounts?.[virtualAccount.loginid];
-                if (virtualBalanceData) {
-                    balance = addComma(
-                        virtualBalanceData.balance?.toFixed(getDecimalPlaces(virtualBalanceData.currency)) ?? '0'
-                    );
-                }
-            }
-        }
 
         return {
             ...activeAccount,
@@ -54,7 +38,7 @@ const useActiveAccount = ({ allBalanceData }: { allBalanceData: Balance | null }
             isActive: activeAccount?.loginid === activeLoginid,
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [activeAccount, activeLoginid, allBalanceData, accountList]);
+    }, [activeAccount, activeLoginid, allBalanceData]);
 
     return {
         /** User's current active account. */

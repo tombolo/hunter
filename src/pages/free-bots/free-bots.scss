@@ -1,10 +1,16 @@
+@use 'components/shared/styles/devices' as *;
+
 .free-bots {
     font-family: 'Poppins', sans-serif;
     padding: 2rem;
     min-height: 100vh;
     background: #0f0f0f;
     color: #e0e0e0;
-    margin-top: 4rem;
+    margin-top: 0;
+
+    @include desktop-screen {
+        margin-top: 4rem;
+    }
     
     &__header {
         text-align: center;

@@ -1,4 +1,5 @@
 @use 'components/shared/styles/mixins' as *;
+@use 'components/shared/styles/devices' as *;
 
 .bot {
     &__chart-container {
@@ -136,4 +137,12 @@
 .cq-modal-dropdown.stxMenuActive {
     left: 0;
     top: 0;
+}
+
+.dashboard__chart-wrapper {
+    margin-top: 0;
+
+    @include desktop-screen {
+        margin-top: 4rem;
+    }
 }

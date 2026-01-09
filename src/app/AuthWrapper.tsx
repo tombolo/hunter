@@ -37,6 +37,12 @@ const setLocalStorageToken = async (
                 if (error) {
                     // Check if the error is due to an invalid token
                     if (error.code === 'InvalidToken') {
+                        // Clear invalid tokens from localStorage
+                        localStorage.removeItem('authToken');
+                        localStorage.removeItem('active_loginid');
+                        localStorage.removeItem('accountsList');
+                        localStorage.removeItem('clientAccounts');
+                        
                         // Set isAuthComplete to true to prevent the app from getting stuck in loading state
                         setIsAuthComplete(true);
 
@@ -45,8 +51,17 @@ const setLocalStorageToken = async (
                             // Emit an event that can be caught by the application to retrigger OIDC authentication
                             globalObserver.emit('InvalidToken', { error });
                         }
+                        return; // Don't save token if authorization failed
+                    } else {
+                        // For other errors, also don't save the token
+                        console.error('Authorization error:', error);
+                        localStorage.removeItem('authToken');
+                        localStorage.removeItem('active_loginid');
+                        setIsAuthComplete(true);
+                        return;
                     }
                 } else {
+                    // Authorization successful
                     const firstId = authorize?.account_list[0]?.loginid;
                     const filteredTokens = loginInfo.filter(token => token.loginid === firstId);
                     if (filteredTokens.length) {
@@ -57,6 +72,9 @@ const setLocalStorageToken = async (
                 }
             }
 
+            // Fallback: if API instance creation failed or no matching account found,
+            // still save the token but log a warning
+            console.warn('Authorization verification skipped or account matching failed. Saving token as fallback.');
             localStorage.setItem('authToken', loginInfo[0].token);
             localStorage.setItem('active_loginid', loginInfo[0].loginid);
         } catch (error) {

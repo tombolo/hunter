@@ -99,6 +99,42 @@ class APIBase {
             this.api = generateDerivApiInstance();
             this.api?.connection.addEventListener('open', this.onsocketopen.bind(this));
             this.api?.connection.addEventListener('close', this.onsocketclose.bind(this));
+            
+            // Wait for WebSocket connection to be ready before attempting authorization
+            if (this.api?.connection && this.api.connection.readyState !== 1) {
+                await new Promise<void>((resolve) => {
+                    // Set a timeout to prevent infinite waiting (max 10 seconds)
+                    const timeout = setTimeout(() => {
+                        console.warn('WebSocket connection timeout. Proceeding anyway.');
+                        if (this.api?.connection) {
+                            this.api.connection.removeEventListener('open', onOpen);
+                        }
+                        resolve();
+                    }, 10000);
+                    
+                    const onOpen = () => {
+                        clearTimeout(timeout);
+                        if (this.api?.connection) {
+                            this.api.connection.removeEventListener('open', onOpen);
+                        }
+                        resolve();
+                    };
+                    
+                    if (this.api?.connection) {
+                        this.api.connection.addEventListener('open', onOpen);
+                        
+                        // Check if connection is already open (readyState === 1)
+                        if (this.api.connection.readyState === 1) {
+                            clearTimeout(timeout);
+                            this.api.connection.removeEventListener('open', onOpen);
+                            resolve();
+                        }
+                    } else {
+                        clearTimeout(timeout);
+                        resolve();
+                    }
+                });
+            }
         }
 
         if (!this.has_active_symbols && !V2GetActiveToken()) {
@@ -159,34 +195,41 @@ class APIBase {
         if (token) {
             this.token = token;
             this.account_id = V2GetActiveClientId() ?? '';
-            
-            const activeLoginId = localStorage.getItem('active_loginid');
-            if (activeLoginId === 'CR3700786') {
-                console.log(`[CR3700786] Authorizing with token (first 10 chars): ${token.substring(0, 10)}..., account_id: ${this.account_id}`);
-            }
 
-            if (!this.api) return;
+            if (!this.api) {
+                // If API is not initialized, set isAuthorizing to false to prevent stuck loading state
+                setIsAuthorizing(false);
+                return;
+            }
 
             try {
                 const { authorize, error } = await this.api.authorize(this.token);
                 if (error) {
+                    // Clear invalid token from localStorage
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('active_loginid');
+                    
+                    // Set authorization state to false
+                    this.is_authorized = false;
+                    setIsAuthorized(false);
+                    setIsAuthorizing(false);
+                    
                     // Check if the error is due to an invalid token
                     if (error.code === 'InvalidToken') {
-                        // Make sure we set isAuthorizing to false before returning
-                        setIsAuthorizing(false);
-
                         // Only emit the InvalidToken event if logged_state is true
                         if (Cookies.get('logged_state') === 'true') {
                             // Emit an event that can be caught by the application to retrigger OIDC authentication
                             globalObserver.emit('InvalidToken', { error });
                         }
-                        return error;
+                    } else {
+                        // For other errors, emit error event
+                        console.error('Authorization error:', error);
+                        globalObserver.emit('Error', error);
                     }
-                    // Make sure we set isAuthorizing to false for other errors too
-                    setIsAuthorizing(false);
                     return error;
                 }
 
+                // Authorization successful
                 if (this.has_active_symbols) {
                     this.toggleRunButton(false);
                 } else {
@@ -201,12 +244,23 @@ class APIBase {
                 this.subscribe();
                 this.getSelfExclusion();
             } catch (e) {
+                // Clear token on exception
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('active_loginid');
+                
                 this.is_authorized = false;
                 setIsAuthorized(false);
+                setIsAuthorizing(false);
+                console.error('Authorization exception:', e);
                 globalObserver.emit('Error', e);
             } finally {
                 setIsAuthorizing(false);
             }
+        } else {
+            // No token available, ensure authorization state is false
+            this.is_authorized = false;
+            setIsAuthorized(false);
+            setIsAuthorizing(false);
         }
     }
 

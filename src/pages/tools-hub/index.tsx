@@ -1,8 +1,9 @@
 import React from 'react';
+import './tools-hub.scss';
 
-const AiPage: React.FC = () => {
+const ToolsHubPage: React.FC = () => {
     return (
-        <div style={{ width: '100%', height: '100vh', marginTop: '4rem' }}>
+        <div className="tools-hub-container" style={{ width: '100%', height: '100vh' }}>
             <iframe
                 src="https://nuntool.vercel.app/"
                 title="NunTool"
@@ -18,4 +19,4 @@ const AiPage: React.FC = () => {
     );
 };
 
-export default AiPage;
+export default ToolsHubPage;

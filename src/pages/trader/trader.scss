@@ -1,0 +1,9 @@
+@use 'components/shared/styles/devices' as *;
+
+.trader-container {
+    margin-top: 0;
+
+    @include desktop-screen {
+        margin-top: 4rem;
+    }
+}

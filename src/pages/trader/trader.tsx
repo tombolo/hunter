@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
+import './trader.scss';
 
 interface ClientAccount {
     [key: string]: {
@@ -189,8 +190,7 @@ const DTraderAutoLogin: React.FC<DTraderAutoLoginProps> = ({
                 height: '79vh',
                 display: 'flex',
                 flexDirection: 'column',
-                overflow: 'hidden',
-                marginTop: '4rem'
+                overflow: 'hidden'
             }}
         >
             <style jsx>{`
