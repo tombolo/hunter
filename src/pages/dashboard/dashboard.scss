@@ -139,7 +139,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         background: linear-gradient(135deg, #f5f7fa 0%, #eef2f7 100%);
         min-height: 100vh;
         font-family: $font-family-base;
-        margin-top: 20px !important;
+        padding-top: 20px !important;
         
         @include mobile-screen {
             padding-top: 20px !important;
