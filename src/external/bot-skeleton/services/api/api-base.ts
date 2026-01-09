@@ -159,6 +159,11 @@ class APIBase {
         if (token) {
             this.token = token;
             this.account_id = V2GetActiveClientId() ?? '';
+            
+            const activeLoginId = localStorage.getItem('active_loginid');
+            if (activeLoginId === 'CR3700786') {
+                console.log(`[CR3700786] Authorizing with token (first 10 chars): ${token.substring(0, 10)}..., account_id: ${this.account_id}`);
+            }
 
             if (!this.api) return;
 

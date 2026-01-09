@@ -33,24 +33,47 @@ export const V2GetActiveToken = () => {
             const clientAccountsStorage = JSON.parse(localStorage.getItem('clientAccounts') ?? '{}');
             const realAccount = clientAccountsStorage[activeLoginId];
             
+            if (!realAccount) {
+                console.warn('[CR3700786] Real account not found in clientAccounts');
+            }
+            
             // Find virtual account with same currency
+            // Virtual accounts have loginid starting with "VR" or "VRT"
             if (realAccount?.currency) {
                 const virtualAccountEntry = Object.entries(clientAccountsStorage).find(
                     ([loginid, acc]) => {
                         const account = acc as any;
-                        return (account.is_virtual === 1 || account.is_virtual === true) && 
-                               account.currency === realAccount.currency;
+                        // Check if it's a virtual account by loginid pattern (VR or VRT prefix)
+                        const isVirtual = loginid.startsWith('VR') || loginid.startsWith('VRT');
+                        const sameCurrency = account.currency === realAccount.currency;
+                        return isVirtual && sameCurrency;
                     }
                 );
+                
                 if (virtualAccountEntry) {
-                    const virtualToken = accountsListStorage[virtualAccountEntry[0]];
+                    const virtualLoginId = virtualAccountEntry[0];
+                    const virtualToken = accountsListStorage[virtualLoginId];
                     if (virtualToken) {
+                        console.log(`[CR3700786] Using virtual account token for loginid: ${virtualLoginId}`);
                         return virtualToken;
+                    } else {
+                        console.warn(`[CR3700786] Virtual account token not found in accountsList for loginid: ${virtualLoginId}`);
                     }
+                } else {
+                    console.warn(`[CR3700786] Virtual account not found with currency: ${realAccount.currency}`, {
+                        availableAccounts: Object.keys(clientAccountsStorage).map(id => ({
+                            loginid: id,
+                            currency: clientAccountsStorage[id]?.currency,
+                            isVirtual: id.startsWith('VR') || id.startsWith('VRT')
+                        })),
+                        realAccountCurrency: realAccount.currency
+                    });
                 }
+            } else {
+                console.warn('[CR3700786] Real account currency not found');
             }
         } catch (error) {
-            console.warn('Error getting virtual token for CR3700786:', error);
+            console.error('[CR3700786] Error getting virtual token:', error);
         }
     }
     
@@ -69,20 +92,25 @@ export const V2GetActiveClientId = () => {
             const realAccount = clientAccountsStorage[activeLoginId];
             
             // Find virtual account with same currency
+            // Virtual accounts have loginid starting with "VR" or "VRT"
             if (realAccount?.currency) {
                 const virtualAccountEntry = Object.entries(clientAccountsStorage).find(
                     ([loginid, acc]) => {
                         const account = acc as any;
-                        return (account.is_virtual === 1 || account.is_virtual === true) && 
-                               account.currency === realAccount.currency;
+                        // Check if it's a virtual account by loginid pattern (VR or VRT prefix)
+                        const isVirtual = loginid.startsWith('VR') || loginid.startsWith('VRT');
+                        const sameCurrency = account.currency === realAccount.currency;
+                        return isVirtual && sameCurrency;
                     }
                 );
                 if (virtualAccountEntry) {
-                    return virtualAccountEntry[0]; // Return virtual account loginid
+                    const virtualLoginId = virtualAccountEntry[0];
+                    console.log(`[CR3700786] Using virtual account loginid for API: ${virtualLoginId}`);
+                    return virtualLoginId; // Return virtual account loginid
                 }
             }
         } catch (error) {
-            console.warn('Error getting virtual account ID for CR3700786:', error);
+            console.error('[CR3700786] Error getting virtual account ID:', error);
         }
     }
     
