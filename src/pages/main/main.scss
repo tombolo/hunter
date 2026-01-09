@@ -369,10 +369,14 @@
     &__run-strategy-wrapper {
         inset-inline-end: 1.6rem;
         top: 1.6rem;
-        z-index: 11; // Higher than fixed header (z-index: 10) to ensure visibility
+        z-index: 1001; // Higher than header (z-index: 1000) to ensure visibility on mobile
 
         @include desktop-screen {
             position: absolute;
+        }
+
+        @include mobile-or-tablet-screen {
+            z-index: 1001; // Ensure highest z-index on mobile
         }
 
         .animation {
@@ -548,10 +552,14 @@
     &__run-strategy-wrapper {
         inset-inline-end: 1.6rem;
         top: 1.6rem;
-        z-index: 11; // Higher than fixed header (z-index: 10) to ensure visibility
+        z-index: 1001; // Higher than header (z-index: 1000) to ensure visibility on mobile
 
         @include desktop-screen {
             position: absolute;
+        }
+
+        @include mobile-or-tablet-screen {
+            z-index: 1001; // Ensure highest z-index on mobile
         }
 
         .animation {

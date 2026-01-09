@@ -18,7 +18,7 @@
             top: 0;
             left: 0;
             width: 100vw;
-            z-index: var(--zindex-drawer);
+            z-index: 1001; // Higher than header (z-index: 1000) to ensure visibility on mobile
 
             &-closed {
                 position: unset;
@@ -216,7 +216,7 @@
         width: 100%;
         background-color: var(--general-main-1);
         border-top: solid 2px var(--general-section-1);
-        z-index: 11;
+        z-index: 1001; // Higher than header (z-index: 1000) to ensure visibility on mobile
     }
 
     &__buttons {
