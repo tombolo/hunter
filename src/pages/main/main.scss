@@ -136,6 +136,8 @@
 
             // Ensure content has spacing when header is fixed
             &.main__tabs {
+                background-color: red !important;
+                
                 .dc-tabs__content {
                     padding-top: 3rem !important; // 24px = ~14px header + 10px spacing
                     background: linear-gradient(135deg, 
@@ -273,8 +275,10 @@
                     // Increase tab width on mobile devices
                     max-width: 130px !important;
                     min-width: 100px !important;
-                    height: 5px;
-                    line-height: 6px;
+                    height: 5px !important;
+                    min-height: 5px !important;
+                    max-height: 5px !important;
+                    line-height: 6px !important;
                 }
                 
                 &:hover:not(.dc-tabs__item--active) {
@@ -290,7 +294,7 @@
                     border-bottom: none;
                     box-shadow: 0 0 0 1px #eab308, 0 4px 12px rgba(234, 179, 8, 0.6);
                     position: relative;
-                    z-index: 100000 !important;
+                    z-index: 1;
                     
                     &::after {
                         content: '';
@@ -317,9 +321,11 @@
                     transition: all 0.15s ease;
                     
                     @include mobile-or-tablet-screen {
-                        height: 9px;
+                        height: 5px !important;
+                        max-height: 5px !important;
                         padding: 0 1px;
                         font-size: 8px;
+                        line-height: 5px !important;
                     }
                     
                     svg {
@@ -371,7 +377,7 @@
                 margin: 0 0 1px 0;
                 min-height: 8px;
                 position: relative;
-                z-index: 99999 !important;
+                z-index: 1;
                 width: 100%;
                 max-width: 100%;
                 box-sizing: border-box;
@@ -454,7 +460,7 @@
                             top: calc(4.9rem + 1.6rem); // Header height (4.9rem) + main padding top (1.6rem)
                             left: 1.6rem;
                             right: 1.6rem;
-                            z-index: 99999 !important;
+                            z-index: 10;
                             background: transparent;
                             transition: right 0.3s ease;
                             padding: 0;
@@ -465,7 +471,6 @@
                                 border-radius: 0 !important;
                                 border-top-left-radius: 0 !important;
                                 border-top-right-radius: 0 !important;
-                                z-index: 99999 !important;
                             }
 
                             // Adjust when drawer is open
@@ -489,7 +494,6 @@
                                     border-radius: 0 !important;
                                     border-top-left-radius: 0 !important;
                                     border-top-right-radius: 0 !important;
-                                    z-index: 99999 !important;
                                 }
                             }
                         }
