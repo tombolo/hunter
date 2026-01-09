@@ -2,14 +2,14 @@ import { LocalStorageConstants, LocalStorageUtils, URLUtils } from '@deriv-com/u
 import { isStaging } from '../url/helpers';
 
 export const APP_IDS = {
-    LOCALHOST: 112504,
-    TMP_STAGING: 112504,
-    STAGING: 112504,
-    STAGING_BE: 112504,
-    STAGING_ME: 112504,
-    PRODUCTION: 112504,
-    PRODUCTION_BE: 112504,
-    PRODUCTION_ME: 112504,
+    LOCALHOST: 114464,
+    TMP_STAGING: 114464,
+    STAGING: 114464,
+    STAGING_BE: 114464,
+    STAGING_ME: 114464,
+    PRODUCTION: 114464,
+    PRODUCTION_BE: 114464,
+    PRODUCTION_ME: 114464,
 };
 
 export const livechat_license_id = 12049137;
@@ -23,8 +23,8 @@ export const domain_app_ids = {
     'dbot.deriv.com': APP_IDS.PRODUCTION,
     'dbot.deriv.be': APP_IDS.PRODUCTION_BE,
     'dbot.deriv.me': APP_IDS.PRODUCTION_ME,
-    'profitmakertool.site': 112504,
-    'www.profitmakertool.site': 112504,
+    'smartmoneyhub.site': 114464,
+    'www.smartmoneyhub.site': 114464,
 };
 
 export const getCurrentProductionDomain = () =>
@@ -83,7 +83,7 @@ export const getDefaultAppIdAndUrl = () => {
 };
 
 export const getAppId = () => {
-    const APP_ID = 112504; // Default app_id for the bot
+    const APP_ID = 114464; // Default app_id for the bot
     localStorage.setItem('APP_ID', APP_ID);
     return APP_ID;
 };

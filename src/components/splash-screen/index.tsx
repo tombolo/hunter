@@ -179,7 +179,7 @@ const SplashScreen: React.FC = () => {
                             <span className='deriv-badge'>DERIV</span>
                         </div>
                         <div className='copyright'>
-                            © {new Date().getFullYear()} Profit Maker Tool | Professional Trading Solutions
+                            © {new Date().getFullYear()} Smart Money Hub | Professional Trading Solutions
                         </div>
                     </div>
                 </div>
