@@ -8,6 +8,7 @@ import { getSetting } from '@/utils/settings';
 import { LegacyClose1pxIcon } from '@deriv/quill-icons/Legacy';
 import { localize } from '@deriv-com/translations';
 import TourButton from '../common/tour-button';
+import TourStartDialog from '../common/tour-start-dialog';
 import { DBOT_ONBOARDING_MOBILE, TMobileTourConfig } from '../tour-content';
 
 const default_tour_data = {
@@ -54,18 +55,17 @@ const OnboardingTourMobile = observer(() => {
         checkTokenForTour();
     }, [active_tab, active_tour]);
 
-    if (!active_tour) {
-        return null;
-    }
-
     return (
-        <div
-            className={classNames('dbot-slider', {
-                'dbot-slider--active': tour_step === 1,
-                'dbot-slider--tour-position': tour_step !== 1,
-            })}
-            data-testid='onboarding-tour-mobile'
-        >
+        <>
+            <TourStartDialog />
+            {active_tour && (
+            <div
+                className={classNames('dbot-slider', {
+                    'dbot-slider--active': tour_step === 1,
+                    'dbot-slider--tour-position': tour_step !== 1,
+                })}
+                data-testid='onboarding-tour-mobile'
+            >
             {tour_step_key !== 1 && (
                 <div className='dbot-slider__navbar'>
                     <Text
@@ -177,6 +177,8 @@ const OnboardingTourMobile = observer(() => {
                 </div>
             </div>
         </div>
+            )}
+        </>
     );
 });
 
