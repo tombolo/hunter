@@ -141,7 +141,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         font-family: $font-family-base;
         
         @include mobile-screen {
-            margin-top: 6px;
+            margin-top: 10px;
         }
         
         // Title styles
