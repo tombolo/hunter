@@ -59,6 +59,13 @@
         border: 1px solid rgba(34, 211, 238, 0.3);
         position: relative;
         overflow: hidden;
+
+        &--drawer-open {
+            @include mobile-or-tablet-screen {
+                padding-top: calc(0.75rem + 20px) !important;
+                padding-bottom: 0.75rem !important;
+            }
+        }
         
         // Subtle corner glow effects
         &::before {
@@ -91,10 +98,22 @@
             max-width: calc(100% - 36.6rem) !important;
             margin-right: 0;
 
+            @include mobile-or-tablet-screen {
+                padding-top: calc(0.75rem + 20px) !important;
+            }
+
             // Ensure all child elements respect the new width
             .dc-tabs {
-                width: 100%;
-                max-width: 100%;
+                width: 100% !important;
+                max-width: 100% !important;
+                height: 80vh !important;
+                max-height: 80vh !important;
+
+                @include mobile-or-tablet-screen {
+                    height: calc(100vh - 20rem) !important;
+                    max-height: calc(100vh - 20rem) !important;
+                    margin-top: 20px !important;
+                }
 
                 &__list {
                     width: 100%;
@@ -102,8 +121,15 @@
                 }
 
                 &__content {
-                    width: 100%;
-                    max-width: 100%;
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    height: auto !important;
+
+                    @include mobile-or-tablet-screen {
+                        height: calc(100vh - 25rem) !important;
+                        max-height: calc(100vh - 25rem) !important;
+                        overflow-y: auto !important;
+                    }
                 }
             }
 
@@ -137,7 +163,7 @@
             // Ensure content has spacing when header is fixed
             &.main__tabs {
                 .dc-tabs__content {
-                    padding-top: 3rem !important; // 24px = ~14px header + 10px spacing
+                    margin-bottom: 7rem !important; // 24px = ~14px header + 10px spacing
                     background: linear-gradient(135deg, 
                         #0f1f24 0%, 
                         #1a2f38 25%, 
@@ -191,7 +217,8 @@
                     }
 
                     @include mobile-or-tablet-screen {
-                        padding-top: 0 !important;
+                        height: calc(var(--tab-content-height-mobile) - 10rem) !important; // Reduce height on mobile
+                        
                     }
                 }
             }
@@ -224,14 +251,15 @@
                 &::after {
                     content: '';
                     position: absolute;
-                    bottom: -1px;
+                    bottom: 1px;
                     left: 1px;
                     right: 1px;
                     height: 5px;
-                    background-color: #eab308;
+                    background-color: #bd2c12;
                     border-radius: 0;
                     opacity: 0.5;
                     transition: all 0.2s ease;
+                    margin-bottom: 3px;
                 }
                 
                 &--active {
@@ -248,7 +276,7 @@
             }
 
             &__item {
-                margin: 0 1.5px;
+                margin: 2px 1.5px;
                 transition: all 0.15s ease;
                 background: linear-gradient(135deg, #22d3ee 0%, #eab308 100%);
                 border: 1px solid rgba(34, 211, 238, 0.5);
@@ -260,6 +288,7 @@
                 border-radius: 0 !important;
                 border-top-left-radius: 0 !important;
                 border-top-right-radius: 0 !important;
+                margin-bottom: 10px !important;
                 // Ensure all tabs have equal width using flexbox with max-width constraint
                 flex: 1 1 0 !important;
                 min-width: 0;
