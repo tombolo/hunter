@@ -441,7 +441,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 margin: 0 auto;
                 gap: 1.5rem;
                 width: 100%;
-                padding: 1.5rem;
+                padding: 0.75rem;
                 word-wrap: break-word;
                 font-size: 1.3rem;
                 text-align: center;
@@ -450,7 +450,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 @include mobile-screen {
                     grid-template-columns: repeat(2, 1fr);
                     gap: 1rem;
-                    padding: 1rem;
+                    padding: 0.5rem;
                     max-width: 100%;
                 }
                 
@@ -465,7 +465,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 }
 
                 @include tablet-screen {
-                    padding: 1.5rem;
+                    padding: 0.75rem;
                     gap: 1.25rem;
                 }
 
@@ -495,10 +495,10 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 flex-direction: column;
                 width: 100%;
                 max-width: 180px;
-                padding: 1rem;
+                padding: 0.5rem;
 
                 @include mobile-or-tablet-screen {
-                    padding: 1rem;
+                    padding: 0.5rem;
                 }
 
                 &:hover {
@@ -534,7 +534,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 background: white;
                 border: 2px solid #e2e8f0;
                 border-radius: 12px;
-                padding: 1.5rem;
+                padding: 0.75rem;
                 transition: $transition;
                 box-shadow: $card-shadow;
                 width: 120px;
@@ -542,7 +542,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                margin: 0 auto 1.2rem;
+                margin: 0 auto 0.5rem;
                 background: white;
                 position: relative;
                 overflow: hidden;
