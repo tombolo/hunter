@@ -19,7 +19,7 @@ const Analysis = () => {
     }, []);
 
     return (
-        <div style={{ width: '100%', marginTop: '2.5rem' }}>
+        <div style={{ width: '100%', marginTop: '0.5rem' }}>
             <iframe
                 ref={iframeRef}
                 src="/sbs/analysis.html"
