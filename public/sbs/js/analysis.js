@@ -14,6 +14,9 @@
    const digitCounts = Array(10).fill(0);
    let tickCount = 1000;
 
+   // Store all tick data for sliding window calculation
+   let tickHistory = []; // Array to store {price, lastDigit, isEven, isRise}
+
    let risefall_array = [];
    let matches_array = [];
    let overunder_array = [];
@@ -62,16 +65,21 @@
       oddCount = 0;
       riseCount = 0;
       fallCount = 0;
+      // Reset tick history when starting new connection
+      tickHistory = [];
+      digitCounts.fill(0);
 
       socket = new WebSocket(wsUrl);
 
       socket.onopen = () => {
          console.log('WebSocket connection established');
-         tickCount = parseInt(document.getElementById("tickCount").value, 10);
+         tickCount = parseInt(document.getElementById("tickCount").value, 10) || 1000;
+         // Request up to tickCount ticks, but API may have limits, so request min(1000, tickCount)
+         const historyCount = Math.min(tickCount, 1000);
          socket.send(JSON.stringify({
             "ticks_history": symbol,
             "adjust_start_time": 1,
-            "count": 100,
+            "count": historyCount,
             "end": "latest",
             "start": 1,
             "style": "ticks",
@@ -102,20 +110,14 @@
                  const history = data.history;
                  const prices = history.prices;
 
+                 const dec_size = getDecimalLength(prices);
+                 decimal_length = dec_size;
+
+                 // Process historical prices and add to tickHistory
                  var prev = 0;
                  for (let i = 0; i < prices.length; i++) {
                     const price = parseFloat(prices[i]);
-                    if (price > prev) {
-                       riseCount++;
-                    } else {
-                       fallCount++;
-                    }
-                    prev = price;
-
-                    const dec_size = getDecimalLength(prices);
-                    decimal_length = dec_size;
-
-                    const priceStr = price.toFixed(decimal_length); // Keeps trailing 0s
+                    const priceStr = price.toFixed(decimal_length);
                     const decimalPart = priceStr.split('.')[1];
 
                     if (decimalPart) {
@@ -123,38 +125,28 @@
                        const lastDigit = parseInt(lastDigitChar);
 
                        if (!isNaN(lastDigit)) {
-                          digitCounts[lastDigit]++;
-
-                          if (lastDigit % 2 === 0) {
-                             evenCount++;
-                          } else {
-                             oddCount++;
-                          }
+                          const isEven = lastDigit % 2 === 0;
+                          const isRise = price > prev;
+                          
+                          // Add to tick history
+                          tickHistory.push({
+                             price: price,
+                             lastDigit: lastDigit,
+                             isEven: isEven,
+                             isRise: isRise
+                          });
                        }
                     }
+                    prev = price;
                  }
 
-                 // Total digits used
-                 const totalDigits = digitCounts.reduce((sum, count) => sum + count, 0);
+                 // Limit tickHistory to tickCount (sliding window)
+                 if (tickHistory.length > tickCount) {
+                    tickHistory = tickHistory.slice(-tickCount);
+                 }
 
-                 // Percentages per digit
-                 const digitPercentages = digitCounts.map(count =>
-                    ((count / totalDigits) * 100).toFixed(2)
-                 );
-
-                 // Optional destructuring of digit percentages
-                 const [
-                    percent0, percent1, percent2, percent3, percent4,
-                    percent5, percent6, percent7, percent8, percent9
-                 ] = digitPercentages;
-
-                 const circleElements = document.querySelectorAll('.circle');
-                 digitPercentages.forEach((percent, index) => {
-                    if (circleElements[index]) {
-                       circleElements[index].setAttribute('data-value', parseFloat(percent).toFixed(2));
-                    }
-                 });
-
+                 // Recalculate all statistics from tickHistory
+                 recalculateStatistics();
 
                  //tick
                  socket.send(JSON.stringify({
@@ -198,6 +190,23 @@
                     const priceStr = price.toFixed(decimal_length);
 
                     const lastDigit = parseInt(priceStr.split('.')[1].slice(-1));
+                    const isEven = lastDigit % 2 === 0;
+                    const isRise = previousPrice !== null && price > previousPrice;
+                    
+                    // Add new tick to history
+                    tickHistory.push({
+                       price: price,
+                       lastDigit: lastDigit,
+                       isEven: isEven,
+                       isRise: isRise
+                    });
+
+                    // Limit tickHistory to tickCount (sliding window)
+                    if (tickHistory.length > tickCount) {
+                       tickHistory.shift(); // Remove oldest tick
+                    }
+
+                    // Update arrays for trading logic
                     overunder_array.push(lastDigit);
                     if (overunder_array.length > overNum) {
                       overunder_array.shift();
@@ -205,7 +214,7 @@
                     
                     matches_array.push(lastDigit);
 
-                    if (previousPrice) {
+                    if (previousPrice !== null) {
                       const chnge = price - previousPrice;
                       var szi = 'F';
                       if (chnge > 0) {
@@ -217,11 +226,9 @@
                       risefall_array.shift();
                     }
 
-                    if (lastDigit % 2 === 0) {
-                       evenCount++;
+                    if (isEven) {
                        evenodd_array.push('E');
                     } else {
-                       oddCount++;
                        evenodd_array.push('O');
                     }
 
@@ -229,60 +236,15 @@
                       evenodd_array.shift();
                     }
 
-                    digitCounts[lastDigit]++;
-                    const totalDigits = digitCounts.reduce((sum, count) => sum + count, 0);
-                    const digitPercentages = digitCounts.map(count =>
-                       ((count / totalDigits) * 100).toFixed(2)
-                    );
-                    const circleElements = document.querySelectorAll('.circle');
-                    digitPercentages.forEach((percent, index) => {
-                       if (circleElements[index]) {
-                          circleElements[index].setAttribute('data-value', percent);
-                       }
-                    });
-
-                    // Find min and max percentage values
-                    const percentagesAsNumbers = digitPercentages.map(Number);
-                    const maxPercent = Math.max(...percentagesAsNumbers);
-                    const minPercent = Math.min(...percentagesAsNumbers);
-
-                    // Loop through circles and update classes
-                    circleElements.forEach((circle, index) => {
-                       circle.classList.remove('highest', 'lowest'); // Clear previous states
-
-                       const percent = Number(circle.getAttribute('data-value'));
-
-                       if (percent === maxPercent) {
-                          circle.classList.add('highest');
-                       } else if (percent === minPercent) {
-                          circle.classList.add('lowest');
-                       }
-                    });
-
+                    // Recalculate all statistics from tickHistory
+                    recalculateStatistics();
 
                     document.querySelector('.price').textContent = `PRICE ${priceStr}`;
                     updateTradeGrid(lastDigit);
                     updateEvenOddGrid(lastDigit);
                     updateRiseFallGrid(price);
                     highlightActiveCircle(lastDigit);
-
-                    if (price > previousPrice) {
-                       riseCount++;
-                    } else {
-                       fallCount++;
-                    }
                     previousPrice = price;
-
-                    // Even/Odd percentages
-                    const evenPercentage = ((evenCount / totalDigits) * 100).toFixed(2);
-                    const oddPercentage = ((oddCount / totalDigits) * 100).toFixed(2);
-                    updateEvenOddProgress(evenPercentage, oddPercentage);
-
-                    // rise/fall percentages
-                    const totalRisefall = riseCount + fallCount;
-                    const risePerecentage = ((riseCount / totalRisefall) * 100).toFixed(2);
-                    const fallPercentage = ((fallCount / totalRisefall) * 100).toFixed(2);
-                    updateRisefallProgress(risePerecentage, fallPercentage);
 
                     //trade
                     if (isrunning) {
@@ -524,6 +486,98 @@
       return xxx;
     }
 
+    // Recalculate all statistics from tickHistory (ensures consistent calculations)
+    function recalculateStatistics() {
+      // Reset all counters
+      digitCounts.fill(0);
+      evenCount = 0;
+      oddCount = 0;
+      riseCount = 0;
+      fallCount = 0;
+
+      // Get only the last tickCount ticks
+      const ticksToUse = tickHistory.slice(-tickCount);
+      
+      if (ticksToUse.length === 0) {
+         // No ticks yet, set default values
+         const circleElements = document.querySelectorAll('.circle');
+         circleElements.forEach((circle, index) => {
+            circle.setAttribute('data-value', '0.00');
+         });
+         updateEvenOddProgress('0.00', '0.00');
+         updateRisefallProgress('0.00', '0.00');
+         return;
+      }
+
+      // Process each tick
+      let prevPrice = null;
+      for (let i = 0; i < ticksToUse.length; i++) {
+         const tick = ticksToUse[i];
+         
+         // Count digits
+         digitCounts[tick.lastDigit]++;
+         
+         // Count even/odd
+         if (tick.isEven) {
+            evenCount++;
+         } else {
+            oddCount++;
+         }
+         
+         // Count rise/fall (need to check against previous tick in history)
+         if (i > 0) {
+            const prevTick = ticksToUse[i - 1];
+            if (tick.price > prevTick.price) {
+               riseCount++;
+            } else if (tick.price < prevTick.price) {
+               fallCount++;
+            }
+         }
+      }
+
+      // Calculate digit percentages
+      const totalDigits = digitCounts.reduce((sum, count) => sum + count, 0);
+      const digitPercentages = digitCounts.map(count =>
+         totalDigits > 0 ? ((count / totalDigits) * 100).toFixed(2) : '0.00'
+      );
+
+      // Update circle elements with percentages
+      const circleElements = document.querySelectorAll('.circle');
+      digitPercentages.forEach((percent, index) => {
+         if (circleElements[index]) {
+            circleElements[index].setAttribute('data-value', percent);
+         }
+      });
+
+      // Find min and max percentage values
+      const percentagesAsNumbers = digitPercentages.map(Number);
+      const maxPercent = Math.max(...percentagesAsNumbers);
+      const minPercent = Math.min(...percentagesAsNumbers);
+
+      // Loop through circles and update classes
+      circleElements.forEach((circle, index) => {
+         circle.classList.remove('highest', 'lowest'); // Clear previous states
+         const percent = Number(circle.getAttribute('data-value'));
+
+         if (percent === maxPercent && maxPercent > 0) {
+            circle.classList.add('highest');
+         } else if (percent === minPercent && minPercent < 100) {
+            circle.classList.add('lowest');
+         }
+      });
+
+      // Calculate and update Even/Odd percentages
+      const evenPercentage = totalDigits > 0 ? ((evenCount / totalDigits) * 100).toFixed(2) : '0.00';
+      const oddPercentage = totalDigits > 0 ? ((oddCount / totalDigits) * 100).toFixed(2) : '0.00';
+      updateEvenOddProgress(evenPercentage, oddPercentage);
+
+      // Calculate and update Rise/Fall percentages
+      const totalRisefall = riseCount + fallCount;
+      const risePercentage = totalRisefall > 0 ? ((riseCount / totalRisefall) * 100).toFixed(2) : '0.00';
+      const fallPercentage = totalRisefall > 0 ? ((fallCount / totalRisefall) * 100).toFixed(2) : '0.00';
+      updateRisefallProgress(risePercentage, fallPercentage);
+    }
+
    function updateTradeGrid(lastDigit) {
       const buttons = document.querySelectorAll('.panel:nth-child(2) .button-grid button');
       for (let i = 0; i < buttons.length - 1; i++) {
@@ -619,9 +673,15 @@
 
    //count
    document.getElementById("tickCount").addEventListener("input", () => {
-      tickCount = parseInt(document.getElementById("tickCount").value, 10);
-      if (tickCount > 0) {
-         startConnection();
+      const newTickCount = parseInt(document.getElementById("tickCount").value, 10);
+      if (newTickCount > 0) {
+         tickCount = newTickCount;
+         // Limit tickHistory to new tickCount
+         if (tickHistory.length > tickCount) {
+            tickHistory = tickHistory.slice(-tickCount);
+         }
+         // Recalculate statistics with new tick count
+         recalculateStatistics();
       }
    });
 
