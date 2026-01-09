@@ -321,8 +321,8 @@
                     transition: all 0.15s ease;
                     
                     @include mobile-or-tablet-screen {
-                        height: 5px !important;
-                        max-height: 5px !important;
+                        height: 15px !important;
+                        max-height: 15px !important;
                         padding: 0 1px;
                         font-size: 8px;
                         line-height: 5px !important;
