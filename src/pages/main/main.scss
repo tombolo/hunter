@@ -152,6 +152,12 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
+
+                @include mobile-or-tablet-screen {
+                    // Increase tab width on mobile devices
+                    max-width: 150px !important;
+                    min-width: 100px !important;
+                }
                 
                 &:hover:not(.dc-tabs__item--active) {
                     background: #031b6d;
