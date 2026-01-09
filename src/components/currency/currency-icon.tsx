@@ -81,11 +81,16 @@ export const CurrencyIcon = ({
         localStorage.getItem('loginid');
 
     /** Virtual check - use prop if provided, otherwise check from client store using accountLoginId */
-    const isVirtual = isVirtualProp !== undefined
+    let isVirtual = isVirtualProp !== undefined
         ? isVirtualProp
         : (accountLoginId
             ? Boolean(client.accounts?.[accountLoginId]?.is_virtual)
             : false);
+
+    // Special case: VRTC5787615 should use real account icon
+    if (accountLoginId === 'VRTC5787615') {
+        isVirtual = false;
+    }
 
     /** Icon resolution logic */
     let Icon;
