@@ -29,6 +29,17 @@ export default Engine =>
                 this.contractId = buy_contract_for_multiple_accounts.result[0].contract_id;
                 this.store.dispatch(purchaseSuccessful());
 
+                // Explicitly request contract updates to ensure we receive settlement updates
+                // This is especially important when using virtual account token for CR3700786
+                if (this.contractId && api_base.api) {
+                    // Request the contract explicitly to ensure we get updates
+                    api_base.api.send({ 
+                        proposal_open_contract: 1, 
+                        contract_id: this.contractId,
+                        subscribe: 1 
+                    });
+                }
+
                 if (this.is_proposal_subscription_required) {
                     this.renewProposalsOnPurchase();
                 }
