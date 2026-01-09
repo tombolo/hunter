@@ -76,3 +76,4 @@ SLACK_WEBHOOK=***
 # global
 # printf
 # mosee
+# WINSS
