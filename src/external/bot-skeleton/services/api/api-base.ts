@@ -238,7 +238,20 @@ class APIBase {
                 this.account_info = authorize;
                 const filtered_accounts = authorize?.account_list || [];
                 setAccountList(filtered_accounts);
-                setAuthData(authorize);
+                
+                // Get the active loginid from localStorage (set during account switching)
+                // Don't let setAuthData override it with authorize.loginid
+                const activeLoginId = localStorage.getItem('active_loginid');
+                if (activeLoginId && authorize?.account_list?.some(acc => acc.loginid === activeLoginId)) {
+                    // The active loginid exists in the account list, keep it
+                    setAuthData(authorize);
+                    // Restore the active loginid after setAuthData (in case it was changed)
+                    localStorage.setItem('active_loginid', activeLoginId);
+                } else {
+                    // Use the loginid from authorize response (first account)
+                    setAuthData(authorize);
+                }
+                
                 setIsAuthorized(true);
                 this.is_authorized = true;
                 this.subscribe();

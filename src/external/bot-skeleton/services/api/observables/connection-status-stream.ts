@@ -38,7 +38,13 @@ export const setAccountList = (accountList: TAuthData['account_list']) => {
 // Set the auth data
 export const setAuthData = (authData: TAuthData | null) => {
     if (authData?.loginid) {
-        localStorage.setItem('active_loginid', authData.loginid);
+        // Only update active_loginid if it's not already set in localStorage
+        // This allows account switching to work properly
+        const currentActiveLoginId = localStorage.getItem('active_loginid');
+        if (!currentActiveLoginId || currentActiveLoginId === authData.loginid) {
+            localStorage.setItem('active_loginid', authData.loginid);
+        }
+        // If currentActiveLoginId is different, keep it (user is switching accounts)
     }
     authData$.next(authData);
 };

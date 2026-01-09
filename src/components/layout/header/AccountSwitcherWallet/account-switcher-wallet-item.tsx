@@ -167,6 +167,25 @@ export const AccountSwitcherWalletItem = observer(
                 // Wait for balance to be loaded (with reduced timeout)
                 await waitForBalance();
                 
+                // Force balance request for the specific account to ensure we get the latest balance
+                if (api_base?.api && api_base?.is_authorized) {
+                    try {
+                        api_base.api.send({
+                            balance: 1,
+                            account: loginIdStr,
+                            subscribe: 1,
+                        });
+                    } catch (error) {
+                        console.warn('Error requesting balance for account:', error);
+                    }
+                }
+                
+                // Trigger a page update by forcing a re-render of account-dependent components
+                // This ensures the UI updates with the new account data
+                if (client) {
+                    client.setLoginId(loginIdStr);
+                }
+                
                 closeAccountsDialog();
 
                 const client_accounts = JSON.parse(localStorage.getItem('clientAccounts') ?? '{}');
@@ -181,6 +200,15 @@ export const AccountSwitcherWalletItem = observer(
                 const account_param = is_virtual ? 'demo' : selected_account.currency;
                 search_params.set('account', account_param);
                 window.history.pushState({}, '', `${window.location.pathname}?${search_params.toString()}`);
+                
+                // Force balance update for the new account
+                setTimeout(() => {
+                    const balanceData = client?.all_accounts_balance?.accounts?.[loginIdStr];
+                    if (balanceData) {
+                        client?.setBalance(balanceData.balance.toFixed(getDecimalPlaces(balanceData.currency)));
+                        client?.setCurrency(balanceData.currency);
+                    }
+                }, 300);
             } catch (error) {
                 console.error('Error switching account:', error);
                 closeAccountsDialog();

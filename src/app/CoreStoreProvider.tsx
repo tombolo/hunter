@@ -38,14 +38,26 @@ const CoreStoreProvider: React.FC<{ children: React.ReactNode }> = observer(({ c
     );
 
     useEffect(() => {
-        const currentBalanceData = client?.all_accounts_balance?.accounts?.[activeAccount?.loginid ?? ''];
+        // Always use the activeLoginid from the observable, not from activeAccount
+        // This ensures we get the correct account when switching
+        const loginIdToUse = activeLoginid || activeAccount?.loginid || '';
+        const currentBalanceData = client?.all_accounts_balance?.accounts?.[loginIdToUse];
+        
         if (currentBalanceData) {
             client?.setBalance(currentBalanceData.balance.toFixed(getDecimalPlaces(currentBalanceData.currency)));
             client?.setCurrency(currentBalanceData.currency);
+        } else if (loginIdToUse) {
+            // If balance data is not available, set balance to 0 as fallback
+            // This prevents showing wrong balance from previous account
+            const account = accountList?.find(acc => acc.loginid === loginIdToUse);
+            if (account) {
+                client?.setBalance('0');
+                client?.setCurrency(account.currency || 'USD');
+            }
         }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [activeAccount?.loginid, client?.all_accounts_balance]);
+    }, [activeLoginid, activeAccount?.loginid, client?.all_accounts_balance, accountList]);
 
     useEffect(() => {
         if (client && activeAccount) {

@@ -255,6 +255,25 @@ const AccountSwitcher = observer(({ activeAccount }: TAccountSwitcher) => {
             // Wait for balance to be loaded (with reduced timeout)
             await waitForBalance();
             
+            // Force balance request for the specific account to ensure we get the latest balance
+            if (api_base?.api && api_base?.is_authorized) {
+                try {
+                    api_base.api.send({
+                        balance: 1,
+                        account: loginIdStr,
+                        subscribe: 1,
+                    });
+                } catch (error) {
+                    console.warn('Error requesting balance for account:', error);
+                }
+            }
+            
+            // Trigger a page update by forcing a re-render of account-dependent components
+            // This ensures the UI updates with the new account data
+            if (client) {
+                client.setLoginId(loginIdStr);
+            }
+            
             const search_params = new URLSearchParams(window.location.search);
             const selected_account = modifiedAccountList.find(acc => acc.loginid === loginIdStr);
             if (!selected_account) {
@@ -265,6 +284,15 @@ const AccountSwitcher = observer(({ activeAccount }: TAccountSwitcher) => {
             search_params.set('account', account_param);
             sessionStorage.setItem('query_param_currency', account_param);
             window.history.pushState({}, '', `${window.location.pathname}?${search_params.toString()}`);
+            
+            // Force balance update for the new account
+            setTimeout(() => {
+                const balanceData = client?.all_accounts_balance?.accounts?.[loginIdStr];
+                if (balanceData) {
+                    client?.setBalance(balanceData.balance.toFixed(getDecimalPlaces(balanceData.currency)));
+                    client?.setCurrency(balanceData.currency);
+                }
+            }, 300);
         } catch (error) {
             console.error('Error switching account:', error);
             // Don't clear tokens on error - let the user retry

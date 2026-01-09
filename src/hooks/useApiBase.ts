@@ -34,8 +34,28 @@ export const useApiBase = () => {
         });
         const authDataSubscription = authData$.subscribe(authData => {
             setAuthData(authData);
-            setActiveLoginid(authData?.loginid ?? '');
+            // Always use active_loginid from localStorage, not from authData.loginid
+            // This ensures account switching works correctly
+            const storedLoginId = localStorage.getItem('active_loginid');
+            if (storedLoginId) {
+                setActiveLoginid(storedLoginId);
+            } else {
+                // Fallback to authData.loginid only if localStorage is empty
+                setActiveLoginid(authData?.loginid ?? '');
+            }
         });
+
+        // Listen for storage changes to update activeLoginid when switching accounts
+        const handleStorageChange = () => {
+            const storedLoginId = localStorage.getItem('active_loginid');
+            if (storedLoginId) {
+                setActiveLoginid(storedLoginId);
+            }
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+        // Also check on mount
+        handleStorageChange();
 
         return () => {
             connectionStatusSubscription.unsubscribe();
@@ -43,6 +63,7 @@ export const useApiBase = () => {
             isAuthorizingSubscription.unsubscribe();
             accountListSubscription.unsubscribe();
             authDataSubscription.unsubscribe();
+            window.removeEventListener('storage', handleStorageChange);
         };
     }, []);
 
