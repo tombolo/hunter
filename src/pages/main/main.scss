@@ -98,6 +98,8 @@
             &.main__tabs {
                 .dc-tabs__content {
                     padding-top: 3rem !important; // 24px = ~14px header + 10px spacing
+                    background: linear-gradient(180deg, #0f0f1e 0%, #1a1a2e 100%);
+                    border-radius: 0 0 8px 8px;
 
                     @include mobile-or-tablet-screen {
                         padding-top: 0 !important;
@@ -137,10 +139,10 @@
                 margin: 0 1px;
                 border-radius: 1px 1px 0 0;
                 transition: all 0.15s ease;
-                background: rgb(194, 46, 9);
-                border: 1px solid #333;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border: 1px solid rgba(102, 126, 234, 0.3);
                 border-bottom: none;
-                box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+                box-shadow: 0 1px 3px rgba(102, 126, 234, 0.2);
                 height: 8px;
                 line-height: 9px;
                 position: relative;
@@ -160,15 +162,17 @@
                 }
                 
                 &:hover:not(.dc-tabs__item--active) {
-                    background: #031b6d;
-                    border-color: #444;
+                    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+                    border-color: rgba(118, 75, 162, 0.5);
+                    box-shadow: 0 2px 6px rgba(118, 75, 162, 0.3);
+                    transform: translateY(-1px);
                 }
                 
                 &--active {
-                    background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
-                    border-color: #ff8c00;
+                    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                    border-color: #f5576c;
                     border-bottom: none;
-                    box-shadow: 0 0 0 1px #ff8c00, 0 2px 8px rgba(255, 140, 0, 0.3);
+                    box-shadow: 0 0 0 1px #f5576c, 0 4px 12px rgba(245, 87, 108, 0.4);
                     position: relative;
                     z-index: 1;
                     
@@ -179,7 +183,7 @@
                         left: 0;
                         right: 0;
                         height: 2px;
-                        background: #ff8c00;
+                        background: linear-gradient(90deg, #f093fb, #f5576c);
                         border-radius: 0 0 4px 4px;
                     }
                 }
@@ -215,19 +219,21 @@
                 &--active .dc-tabs__link {
                     color: #fff;
                     font-weight: 600;
+                    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
                     
                     svg {
-                        color: #ff8c00;
+                        color: #fff;
+                        filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
                     }
                 }
             }
 
             &__list {
-                background: #faf8f8;
+                background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
                 justify-content: flex-start;
                 padding: 1px 1px 0;
                 border-radius: 2px;
-                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
                 margin: 0 0 2px 0;
                 min-height: 12px;
                 position: relative;
