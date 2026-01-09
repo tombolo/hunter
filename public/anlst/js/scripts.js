@@ -1,6 +1,6 @@
 // WebSocket connection variables
 let ws = null;
-let appId = 118542;
+let appId = 112504;
 let activeMarket = null;
 let activeStrategy = null;
 let tickHistory = [];
@@ -151,7 +151,7 @@ function connect() {
     connectBtn.disabled = true;
     
     // WebSocket connection to Deriv
-    ws = new WebSocket(`wss://ws.binaryws.com/websockets/v3?app_id=118542`);
+    ws = new WebSocket(`wss://ws.binaryws.com/websockets/v3?app_id=112504`);
     
     ws.onopen = function() {
         statusIndicator.style.backgroundColor = '#10b981';
