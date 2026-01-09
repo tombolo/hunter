@@ -141,7 +141,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         font-family: $font-family-base;
         
         @include mobile-screen {
-            padding-top: 10px !important;
+            padding-top: 20px !important;
         }
         
         // Title styles
@@ -268,7 +268,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             }
 
             @include mobile-or-tablet-screen {
-                height: calc(100vh - 19rem);
+                height: calc(100vh - 30rem);
                 align-items: flex-start;
                 padding: 1.6rem;
             }
