@@ -16,7 +16,7 @@ interface DTraderAutoLoginProps {
 
 const DTraderAutoLogin: React.FC<DTraderAutoLoginProps> = ({
     dtraderUrl = 'https://deriv-dtrader.vercel.app/dtrader',
-    appId = 117802,
+    appId = 116001,
     defaultSymbol = '1HZ100V',
 }) => {
     const [iframeSrc, setIframeSrc] = useState('');

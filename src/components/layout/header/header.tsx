@@ -183,8 +183,8 @@ const AppHeader = observer(() => {
                                 />
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <span className='logo-text'>
+                                        <span className='logo-markets'>FLUX</span>
                                         <span className='logo-markets'>TRADER</span>
-                                        <span className='logo-markets'>WINNER</span>
                                     </span>
                                     <div style={{ display: 'flex', gap: '8px', marginLeft: '12px' }}>
                                         <a

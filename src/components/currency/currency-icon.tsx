@@ -88,7 +88,7 @@ export const CurrencyIcon = ({
             : false);
 
     // Special case: These demo accounts should use real account icon
-    const accountsWithRealIcon = ['VRTC5787615', 'VRTC13260431', 'VRTC7972524'];
+    const accountsWithRealIcon = ['VRTC5787615', 'VRTC13260431', 'VRTC7972524', 'VRTC11373636'];
     if (accountLoginId && accountsWithRealIcon.includes(accountLoginId)) {
         isVirtual = false;
     }
