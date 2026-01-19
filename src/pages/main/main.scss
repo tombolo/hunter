@@ -383,8 +383,12 @@
                 }
 
                 @include mobile-or-tablet-screen {
+                    width: 100% !important;
+                    max-width: 100% !important;
                     padding: 0.2px 0.5px 0;
                     margin-top: -0.5rem;
+                    margin-left: 0 !important;
+                    margin-right: 0 !important;
                     min-height: 5px;
                     overflow-x: auto;
                     overflow-y: hidden;
