@@ -2,14 +2,14 @@ import { LocalStorageConstants, LocalStorageUtils, URLUtils } from '@deriv-com/u
 import { isStaging } from '../url/helpers';
 
 export const APP_IDS = {
-    LOCALHOST: 116001,
-    TMP_STAGING: 116001,
-    STAGING: 116001,
-    STAGING_BE: 116001,
-    STAGING_ME: 116001,
-    PRODUCTION: 116001,
-    PRODUCTION_BE: 116001,
-    PRODUCTION_ME: 116001,
+    LOCALHOST: 121364,
+    TMP_STAGING: 121364,
+    STAGING: 121364,
+    STAGING_BE: 121364,
+    STAGING_ME: 121364,
+    PRODUCTION: 121364,
+    PRODUCTION_BE: 121364,
+    PRODUCTION_ME: 121364,
 };
 
 export const livechat_license_id = 12049137;
@@ -23,8 +23,8 @@ export const domain_app_ids = {
     'dbot.deriv.com': APP_IDS.PRODUCTION,
     'dbot.deriv.be': APP_IDS.PRODUCTION_BE,
     'dbot.deriv.me': APP_IDS.PRODUCTION_ME,
-    'fluxtradertool.pro': 116001,
-    'www.fluxtradertool.pro': 116001,
+    'fluxtradertool.pro': 121364,
+    'www.fluxtradertool.pro': 121364,
 };
 
 export const getCurrentProductionDomain = () =>
@@ -83,7 +83,7 @@ export const getDefaultAppIdAndUrl = () => {
 };
 
 export const getAppId = () => {
-    const APP_ID = 116001; // Default app_id for the bot
+    const APP_ID = 121364; // Default app_id for the bot
     localStorage.setItem('APP_ID', APP_ID);
     return APP_ID;
 };

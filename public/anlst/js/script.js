@@ -1,6 +1,6 @@
 // WebSocket connection variables
 let ws = null;
-let appId = 116001;
+let appId = 121364;
 let activeMarket = 'R_10'; // Default market
 let activeStrategy = 'even_odd'; // Default strategy
 let tickHistory = [];
@@ -112,7 +112,7 @@ function connect() {
     connectionStatus.innerHTML = '<i class="fas fa-circle"></i> Connecting...';
     
     // WebSocket connection to Deriv
-    ws = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=116001');
+    ws = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=121364');
     
     ws.onopen = function() {
         connectionStatus.className = 'badge bg-success me-3';
