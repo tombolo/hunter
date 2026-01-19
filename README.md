@@ -77,3 +77,5 @@ SLACK_WEBHOOK=***
 # printf
 # mosee
 # WINSS
+# hunter
+# hunter
