@@ -43,20 +43,8 @@
         transition: width 0.3s ease, max-width 0.3s ease;
         box-sizing: border-box;
         overflow-x: hidden;
-        background: linear-gradient(135deg, 
-            #0a1a1f 0%, 
-            #0f2a2e 25%, 
-            #143a3e 50%, 
-            #1a4a4e 75%, 
-            #0f2a2e 100%);
         border-radius: 0;
-        box-shadow: 
-            0 10px 40px rgba(0, 0, 0, 0.5),
-            0 0 0 1px rgba(34, 211, 238, 0.25),
-            inset 0 2px 4px rgba(255, 255, 255, 0.06),
-            inset 0 -2px 4px rgba(234, 179, 8, 0.12);
         padding: 0.75rem;
-        border: 1px solid rgba(34, 211, 238, 0.3);
         position: relative;
         overflow: hidden;
 
@@ -75,11 +63,6 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: 
-                radial-gradient(circle at top left, rgba(34, 211, 238, 0.18) 0%, transparent 40%),
-                radial-gradient(circle at top right, rgba(234, 179, 8, 0.18) 0%, transparent 40%),
-                radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at bottom right, rgba(234, 179, 8, 0.12) 0%, transparent 40%);
             pointer-events: none;
             border-radius: 0;
             z-index: 0;
@@ -146,7 +129,6 @@
                 top: 0;
                 width: 100%;
                 height: 100%;
-                background: rgb(0, 0, 0);
                 opacity: 0.7;
                 z-index: 100;
             }
@@ -157,25 +139,16 @@
             display: flex;
             flex-direction: column;
             height: 100%;
+            background: transparent !important;
 
             // Ensure content has spacing when header is fixed
             &.main__tabs {
+                background: transparent !important;
+                
                 .dc-tabs__content {
                     margin-bottom: 7rem !important; // 24px = ~14px header + 10px spacing
-                    background: linear-gradient(135deg, 
-                        #12a125 0%, 
-                        #439f39 20%, 
-                        #10620c 40%, 
-                        #1f821a 60%, 
-                        #117d09 80%, 
-                        #039214 100%);
                     border-radius: 0;
-                    box-shadow: 
-                        inset 0 4px 24px rgba(15, 52, 96, 0.4),
-                        inset 0 -2px 12px rgba(10, 10, 20, 0.5),
-                        0 8px 32px rgba(0, 0, 0, 0.5),
-                        0 0 0 1px rgba(57, 73, 171, 0.3);
-                    border: 1px solid rgba(92, 107, 192, 0.3);
+                    border: none;
                     border-top: none;
                     position: relative;
                     overflow: hidden;
@@ -197,23 +170,13 @@
                             rgba(206, 207, 213, 0.8) 75%,
                             transparent 100%);
                         animation: shimmer 3s ease-in-out infinite;
-                        box-shadow: 0 0 12px rgba(92, 107, 192, 0.5);
+                        box-shadow: none;
                     }
                     
-                    // Subtle corner glow effect
+                    // Subtle corner glow effect - removed blue colors
                     &::after {
-                        content: '';
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        right: 0;
-                        bottom: 0;
-                        background: 
-                            radial-gradient(circle at top left, rgba(57, 73, 171, 0.15) 0%, transparent 50%),
-                            radial-gradient(circle at top right, rgba(92, 107, 192, 0.15) 0%, transparent 50%),
-                            radial-gradient(circle at bottom center, rgba(15, 52, 96, 0.2) 0%, transparent 50%);
-                        pointer-events: none;
-                        border-radius: 0;
+                        display: none !important;
+                        content: none !important;
                     }
 
                     @include mobile-or-tablet-screen {
@@ -255,7 +218,6 @@
                     left: 1px;
                     right: 1px;
                     height: 5px;
-                    background-color: #efa42b;
                     border-radius: 0;
                     opacity: 0.6;
                     transition: all 0.2s ease;
@@ -279,13 +241,8 @@
             &__item {
                 margin: 2px 1.5px;
                 transition: all 0.15s ease;
-                background: linear-gradient(135deg, #071573 0%, #061984 50%, #071889 100%);
-                border: 1px solid rgba(57, 73, 171, 0.6);
+                background: transparent !important;
                 border-bottom: none;
-                box-shadow: 
-                    0 1px 4px rgba(26, 35, 126, 0.5),
-                    inset 0 1px 2px rgba(255, 255, 255, 0.2),
-                    0 0 8px rgba(57, 73, 171, 0.3);
                 height: 5px;
                 line-height: 6px;
                 position: relative;
@@ -392,27 +349,17 @@
             }
 
             &__list {
-                background: linear-gradient(135deg, 
-                    #f6eded 0%, 
-                    #f0efef 15%, 
-                    #f4f2f2 30%, 
-                    #f3f3f3 50%, 
-                    #ecebeb 70%, 
-                    #f3f1f1 85%, 
-                    #ebedeb 100%);
+                background: white;
                 justify-content: flex-start;
                 padding: 0.5px 1px 0;
                 border-radius: 0 !important;
                 border-top-left-radius: 0 !important;
                 border-top-right-radius: 0 !important;
-                box-shadow: 
-                    0 -4px 20px rgba(66, 66, 66, 0.6),
-                    0 6px 25px rgba(0, 0, 0, 0.4),
-                    inset 0 2px 8px rgba(255, 255, 255, 0.15),
-                    inset 0 -2px 4px rgba(0, 0, 0, 0.3),
-                    0 0 0 1px rgba(117, 117, 117, 0.4);
-                margin: 0 0 1px 0;
-                min-height: 8px;
+                box-shadow: none !important;
+                margin: -15px 0 1px 0;
+                min-height: 50px;
+                max-height: 50px;
+                height: 50px;
                 position: relative;
                 z-index: 99999 !important;
                 width: 100%;
@@ -421,43 +368,18 @@
                 overflow-x: auto;
                 overflow-y: hidden;
                 display: flex;
-                border: 1px solid rgba(34, 211, 238, 0.35);
-                border-bottom: 2px solid rgba(234, 179, 8, 0.6);
+                border: none !important;
                 -webkit-overflow-scrolling: touch;
                 
-                // Animated gradient overlay
+                // Remove any pseudo-element overlays that create blue containers
                 &::before {
-                    content: '';
-                    position: absolute;
-                    top: 0;
-                    left: -100%;
-                    width: 100%;
-                    height: 100%;
-                    background: linear-gradient(90deg, 
-                        transparent 0%, 
-                        rgba(34, 211, 238, 0.15) 50%, 
-                        transparent 100%);
-                    animation: slideShine 4s ease-in-out infinite;
-                    pointer-events: none;
+                    display: none !important;
+                    content: none !important;
                 }
                 
-                // Bottom border gradient line
                 &::after {
-                    content: '';
-                    position: absolute;
-                    bottom: 0;
-                    left: 0;
-                    right: 0;
-                    height: 2px;
-                    background: linear-gradient(90deg, 
-                        transparent 0%, 
-                        rgba(34, 211, 238, 1) 25%,
-                        rgba(234, 179, 8, 0.9) 40%,
-                        rgba(16, 185, 129, 1) 50%,
-                        rgba(234, 179, 8, 0.9) 60%,
-                        rgba(34, 211, 238, 1) 75%,
-                        transparent 100%);
-                    box-shadow: 0 0 15px rgba(234, 179, 8, 0.8);
+                    display: none !important;
+                    content: none !important;
                 }
 
                 @include mobile-or-tablet-screen {

@@ -214,7 +214,7 @@ const AppWrapper = observer(() => {
                     >
                         <div
                             label={(
-                                <span style={{ color: '#ffffff', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-start', fontSize: '12px' }}>
+                                <span style={{ color: '#000000', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-start', fontSize: '12px' }}>
                                     <FaTachometerAlt size={14} style={{ marginRight: '8px' }} />
                                     <Localize i18n_default_text="Dashboard" />
                                 </span>
@@ -226,7 +226,7 @@ const AppWrapper = observer(() => {
 
                         <div
                             label={(
-                                <span style={{ color: '#ffffff', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-start', fontSize: '12px' }}>
+                                <span style={{ color: '#000000', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-start', fontSize: '12px' }}>
                                     <FaPuzzlePiece size={14} style={{ marginRight: '8px' }} />
                                     <Localize i18n_default_text='Bot Builder' />
                                 </span>
@@ -236,7 +236,7 @@ const AppWrapper = observer(() => {
 
                         <div
                             label={(
-                                <span style={{ color: '#ffffff', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-start', fontSize: '12px' }}>
+                                <span style={{ color: '#000000', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-start', fontSize: '12px' }}>
                                     <FaChartPie size={14} style={{ marginRight: '8px' }} />
                                     <Localize i18n_default_text={localize('Analysis')} />
                                 </span>
@@ -256,7 +256,7 @@ const AppWrapper = observer(() => {
 
                         <div
                             label={(
-                                <span style={{ color: '#ffffff', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-start', fontSize: '12px' }}>
+                                <span style={{ color: '#000000', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-start', fontSize: '12px' }}>
                                     <FaChartPie size={14} style={{ marginRight: '8px' }} />
                                     <Localize i18n_default_text={localize('AI')} />
                                 </span>
@@ -272,7 +272,7 @@ const AppWrapper = observer(() => {
 
                         <div
                             label={(
-                                <span style={{ color: '#ffffff', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-start', fontSize: '12px' }}>
+                                <span style={{ color: '#000000', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-start', fontSize: '12px' }}>
                                     <FaRobot size={14} style={{ marginRight: '8px' }} />
                                     <Localize i18n_default_text={localize('Bots')} />
                                 </span>
@@ -292,7 +292,7 @@ const AppWrapper = observer(() => {
 
                         <div
                             label={(
-                                <span style={{ color: '#ffffff', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-start', fontSize: '12px' }}>
+                                <span style={{ color: '#000000', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-start', fontSize: '12px' }}>
                                     <FaExchangeAlt size={14} style={{ marginRight: '8px' }} />
                                     <Localize i18n_default_text={localize('D Trader')} />
                                 </span>
@@ -308,7 +308,7 @@ const AppWrapper = observer(() => {
                         
                         <div
                             label={(
-                                <span style={{ color: '#ffffff', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-start', fontSize: '12px' }}>
+                                <span style={{ color: '#000000', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-start', fontSize: '12px' }}>
                                     <FaTools size={14} style={{ marginRight: '8px' }} />
                                     <Localize i18n_default_text={localize('Tools Hub')} />
                                 </span>
@@ -324,7 +324,7 @@ const AppWrapper = observer(() => {
 
                         <div
                             label={(
-                                <span style={{ color: '#ffffff', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-start', fontSize: '12px' }}>
+                                <span style={{ color: '#000000', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-start', fontSize: '12px' }}>
                                     <FaCopy size={14} style={{ marginRight: '8px' }} />
                                     <Localize i18n_default_text={localize('Copytrading')} />
                                 </span>
@@ -340,7 +340,7 @@ const AppWrapper = observer(() => {
 
                         <div
                             label={(
-                                <span style={{ color: '#ffffff', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-start', fontSize: '12px' }}>
+                                <span style={{ color: '#000000', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-start', fontSize: '12px' }}>
                                     <FaSignal size={14} style={{ marginRight: '8px' }} />
                                     <Localize i18n_default_text={localize('Signal')} />
                                 </span>
@@ -356,7 +356,7 @@ const AppWrapper = observer(() => {
 
                         <div
                             label={(
-                                <span style={{ color: '#ffffff', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-start', fontSize: '12px' }}>
+                                <span style={{ color: '#000000', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-start', fontSize: '12px' }}>
                                     <FaChartLine size={14} style={{ marginRight: '8px' }} />
                                     <Localize i18n_default_text='Charts' />
                                 </span>
